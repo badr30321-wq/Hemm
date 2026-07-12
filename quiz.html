@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قمة وقاع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0B1220;
+    --midnight-2:#111a2b;
+    --gold:#E8B440;
+    --gold-soft:#f3d488;
+    --teal:#1F6F63;
+    --crimson:#B23A48;
+    --mist:#F2EFE6;
+    --fog:#4A5568;
+    --panel:#152137;
+    --panel-2:#1b2a45;
+    --line:#26385a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Cairo',sans-serif;
+    background:var(--midnight);
+    color:var(--mist);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .display-font{font-family:'Tajawal',sans-serif;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+  /* ---------- Mode switcher ---------- */
+  #modeSwitch{
+    position:fixed; top:10px; left:10px; z-index:999;
+    display:none; gap:10px; align-items:center; background:rgba(11,18,32,.85);
+    padding:6px 6px 6px 12px; border-radius:10px; border:1px solid var(--line);
+    backdrop-filter:blur(6px);
+  }
+  #modeSwitch .btns{display:flex; gap:6px;}
+  #modeSwitch button{
+    font-family:'Cairo',sans-serif; font-size:12px; font-weight:700;
+    padding:6px 10px; border-radius:7px; border:none; cursor:pointer;
+    background:transparent; color:#9fb0c9;
+  }
+  #modeSwitch button.active{background:var(--gold); color:#221a05;}
+  #modeSwitch .gameTag{font-family:'Tajawal',sans-serif; font-size:12px; color:var(--gold-soft); font-weight:800;}
+  #modeSwitch button.leave{color:#ff8b93;}
+
+  /* ---------- Gate screen ---------- */
+  #gate{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:22px;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(232,180,64,.18), transparent 60%),
+      linear-gradient(180deg, #0B1220 0%, #0d1a2e 55%, #0a1420 100%);
+    padding:24px; text-align:center;
+  }
+  #gate h1{font-family:'Tajawal',sans-serif; font-weight:900; font-size:clamp(28px,4vw,44px); color:var(--gold); margin:0;}
+  #gate p{color:#9fb0c9; font-size:14px; max-width:440px; margin:0;}
+  .gate-card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--line);
+    border-radius:18px; padding:26px; width:min(380px,90%);
+  }
+  .gate-card label{text-align:right;}
+  .gate-card input{
+    text-align:center; font-family:'Tajawal',sans-serif; font-weight:800; font-size:20px; letter-spacing:2px;
+  }
+  .gate-actions{display:flex; flex-direction:column; gap:10px; margin-top:16px;}
+  .gate-actions button{width:100%; padding:12px; font-size:14px;}
+  #gateError{color:var(--crimson); font-size:12px; font-weight:700; min-height:16px;}
+
+  /* ================= ADMIN ================= */
+  #admin{display:none; padding:64px 18px 40px; max-width:1400px; margin:0 auto;}
+  #admin.show{display:block;}
+  .admin-title{font-family:'Tajawal',sans-serif; font-weight:900; font-size:26px; color:var(--gold); margin:0 0 4px;}
+  .admin-sub{color:#8ea0bd; font-size:13px; margin:0 0 22px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px;}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line); border-radius:16px; padding:18px;
+  }
+  .card h3{
+    font-family:'Tajawal',sans-serif; margin:0 0 12px; font-size:16px; color:var(--gold-soft);
+    display:flex; align-items:center; gap:8px;
+  }
+  .card h3 .ic{font-size:18px;}
+  label{font-size:12px; color:#9fb0c9; display:block; margin:10px 0 4px;}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; padding:11px 10px; border-radius:8px; border:1px solid var(--line);
+    background:#0e1626; color:var(--mist); font-family:'Cairo',sans-serif; font-size:16px;
+  }
+  textarea{resize:vertical; min-height:50px;}
+  .row{display:flex; gap:8px;}
+  .row > *{flex:1;}
+  button.btn{
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:14px; cursor:pointer;
+    padding:11px 14px; border-radius:9px; border:1px solid var(--line);
+    background:#1c2b47; color:var(--mist); transition:.15s; min-height:42px;
+  }
+  button.btn:hover{background:#233555;}
+  button.btn.gold{background:var(--gold); color:#221a05; border-color:var(--gold);}
+  button.btn.gold:hover{background:var(--gold-soft);}
+  button.btn.teal{background:var(--teal); color:#eafff9; border-color:var(--teal);}
+  button.btn.crimson{background:var(--crimson); color:#fff; border-color:var(--crimson);}
+  button.btn.ghost{background:transparent;}
+  button.btn.small{padding:6px 9px; font-size:12px;}
+  button.btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+
+  .qbank-item{
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px; font-size:13px;
+  }
+  .qbank-item .meta{color:#8ea0bd; font-size:11px;}
+  .qbank-actions{display:flex; gap:6px; flex-shrink:0;}
+
+  .round-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px;}
+  .round-btn{
+    padding:10px 0; text-align:center; border-radius:9px; border:1px solid var(--line);
+    background:#0e1626; cursor:pointer; font-weight:700; font-family:'Tajawal',sans-serif; font-size:13px;
+    position:relative; min-height:44px; display:flex; align-items:center; justify-content:center;
+  }
+  .round-btn.active{background:var(--gold); color:#221a05; border-color:var(--gold);}
+  .round-btn.trap-a::after, .round-btn.trap-b::after{
+    content:''; position:absolute; top:-4px; left:-4px; width:8px; height:8px; border-radius:50%;
+  }
+  .round-btn.trap-a::after{background:#3aa0ff;}
+  .round-btn.trap-b::after{background:var(--crimson);}
+
+  .team-box{border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;}
+  .team-box .th{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .team-box .th input{width:auto; flex:1; font-weight:700; font-family:'Tajawal',sans-serif;}
+  .score-tag{font-family:'Tajawal',sans-serif; font-weight:900; color:var(--gold); font-size:18px;}
+  .warn{color:var(--crimson); font-weight:700; font-size:12px; margin-top:6px;}
+
+  .timer-display{
+    font-family:'Tajawal',sans-serif; font-weight:900; font-size:34px; text-align:center;
+    color:var(--gold); background:#0e1626; border-radius:12px; padding:10px; margin-bottom:10px; letter-spacing:2px;
+  }
+
+  .helper-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed var(--line);}
+  .helper-row:last-child{border-bottom:none;}
+  .helper-name{display:flex; gap:8px; align-items:center; font-size:13px;}
+  .dot{width:8px; height:8px; border-radius:50%; background:#3a4a6a;}
+  .dot.on{background:#39d98a; box-shadow:0 0 8px #39d98a;}
+
+  .reveal-row{display:flex; gap:8px; margin-top:10px;}
+  .answer-picker{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px;}
+  .answer-picker button{
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:12px; cursor:pointer; text-align:center;
+    padding:9px 8px; border-radius:9px; border:1px solid var(--line); background:#0e1626; color:var(--mist);
+  }
+  .answer-picker button.picked{background:linear-gradient(90deg,#f2c94c,#c99a1f); color:#221a05; border-color:#f2c94c;}
+
+  /* ================= DISPLAY ================= */
+  #display{display:none; min-height:100vh; position:relative; padding:26px; overflow:hidden;}
+  #display.show{display:flex;}
+  .mountain-bg{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(232,180,64,.18), transparent 60%),
+      linear-gradient(180deg, #0B1220 0%, #0d1a2e 55%, #0a1420 100%);
+  }
+  .stars{position:absolute; inset:0; z-index:0;
+    background-image: radial-gradient(1px 1px at 20% 30%, #ffffff55 50%, transparent),
+                       radial-gradient(1px 1px at 70% 15%, #ffffff44 50%, transparent),
+                       radial-gradient(2px 2px at 85% 60%, #ffffff33 50%, transparent),
+                       radial-gradient(1px 1px at 40% 70%, #ffffff44 50%, transparent),
+                       radial-gradient(1px 1px at 55% 40%, #ffffff33 50%, transparent);
+    opacity:.7;
+  }
+  .stage{position:relative; z-index:1; display:flex; width:100%; gap:24px;}
+  .ladder-wrap{
+    width:220px; flex-shrink:0; display:flex; flex-direction:column-reverse; gap:16px;
+    position:relative; padding:4px 0;
+  }
+  .ladder-wrap::before{
+    content:''; position:absolute; top:0; bottom:0; left:50%; width:4px; transform:translateX(-50%);
+    background:linear-gradient(to top, var(--teal), var(--gold)); border-radius:4px; opacity:.45;
+  }
+  .rung{
+    width:96px; border-radius:14px; padding:10px 6px; font-family:'Tajawal',sans-serif; font-weight:900;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--line);
+    background:#0e1626cc; color:#5f7396; position:relative; z-index:1;
+  }
+  .rung.side-l{align-self:flex-start;}
+  .rung.side-r{align-self:flex-end;}
+  .rung.side-l::after, .rung.side-r::after{
+    content:''; position:absolute; top:50%; height:3px; width:22px; background:#3a4a6a; opacity:.6; z-index:-1;
+  }
+  .rung.side-l::after{right:-22px;}
+  .rung.side-r::after{left:-22px;}
+  .rung.reached::after{background:var(--teal);}
+  .rung.current::after{background:var(--gold);}
+  .rung .val{font-size:19px;}
+  .rung .idx{font-size:10px; opacity:.6; font-weight:600;}
+  .rung.reached{background:linear-gradient(160deg,var(--teal),#134a41); color:#eafff9; border-color:var(--teal);}
+  .rung.current{
+    background:linear-gradient(160deg,var(--gold),#c98f2a); color:#221a05; border-color:var(--gold);
+    box-shadow:0 0 26px #e8b44088; transform:scale(1.18); z-index:2;
+  }
+  .rung .flag{position:absolute; top:-10px; font-size:16px;}
+  .rung.side-l .flag{right:-6px;} .rung.side-r .flag{left:-6px;}
+  .rung.trap-mark{box-shadow:inset 0 0 0 2px var(--crimson);}
+  .rung.peak .val::before{content:'👑 '; }
+
+  .main-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:22px; padding-top:6px;}
+  .teams-bar{display:flex; gap:16px; width:100%; justify-content:center;}
+  .team-pill{
+    background:#0e1626cc; border:1px solid var(--line); border-radius:16px; padding:10px 22px; text-align:center; min-width:180px;
+  }
+  .team-pill .nm{font-family:'Tajawal',sans-serif; font-weight:700; font-size:15px; color:#cdd8ea;}
+  .team-pill .sc{font-family:'Tajawal',sans-serif; font-weight:900; font-size:26px; color:var(--gold);}
+  .team-pill.eliminated{opacity:.35; filter:grayscale(1);}
+
+  .timer-ring{
+    width:110px; height:110px; border-radius:50%; border:6px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-family:'Tajawal',sans-serif;
+    font-weight:900; font-size:34px; color:var(--gold); background:#0e1626cc; position:relative;
+  }
+  .timer-ring.low{border-color:var(--crimson); color:var(--crimson); animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.08);}}
+
+  .qcard{
+    width:min(880px,92%); background:linear-gradient(180deg,#152137,#0e1626); border:1px solid var(--line);
+    border-radius:22px; padding:28px 34px; text-align:center; box-shadow:0 20px 60px #00000055;
+  }
+  .qcard .rlabel{color:var(--gold-soft); font-size:13px; font-weight:700; letter-spacing:1px; margin-bottom:6px;}
+  .qcard .qtext{font-family:'Tajawal',sans-serif; font-weight:800; font-size:clamp(20px,3vw,32px); line-height:1.5;}
+
+  .team-badge{
+    display:flex; align-items:center; gap:14px; padding:12px 24px; border-radius:18px;
+    border:2px solid var(--line); background:#0e1626cc;
+  }
+  .team-badge.t0{border-color:#3aa0ff; box-shadow:0 0 24px #3aa0ff33;}
+  .team-badge.t1{border-color:var(--crimson); box-shadow:0 0 24px #b23a4833;}
+  .tb-avatar{font-size:30px;}
+  .tb-info{text-align:right;}
+  .tb-name{font-family:'Tajawal',sans-serif; font-weight:900; font-size:19px; color:var(--mist);}
+  .tb-level{font-size:13px; color:#9fb0c9; margin-top:2px;}
+  .tb-level b{color:var(--gold); font-family:'Tajawal',sans-serif; font-size:15px;}
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:14px; width:min(880px,92%);}
+  .opt{
+    background:#152137; border:1px solid var(--line); border-radius:14px; padding:16px 18px; font-family:'Tajawal',sans-serif;
+    font-weight:700; font-size:clamp(15px,1.6vw,19px); transition:.25s; text-align:center;
+  }
+  .opt.removed{opacity:0; transform:scale(.85); pointer-events:none; height:0; padding:0; margin:0; border:none;}
+  .opt.selected-flash{background:linear-gradient(90deg,#f2c94c,#c99a1f); border-color:#f2c94c; color:#221a05; box-shadow:0 0 20px #f2c94c66;}
+  .opt.correct-flash{background:linear-gradient(90deg,var(--teal),#134a41); border-color:#39d98a; color:#eafff9;}
+  .opt.wrong-flash{background:linear-gradient(90deg,var(--crimson),#7a2530); border-color:var(--crimson); color:#fff;}
+
+  .reveal-banner{
+    font-family:'Tajawal',sans-serif; font-weight:900; font-size:clamp(24px,3vw,40px); padding:16px 40px; border-radius:18px;
+  }
+  .reveal-banner.ok{background:#0f3d2f; color:#39d98a; border:2px solid #39d98a;}
+  .reveal-banner.no{background:#3d1418; color:#ff6b7a; border:2px solid var(--crimson);}
+
+  .helper-overlay{
+    position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+    background:rgba(6,10,20,.86); backdrop-filter:blur(4px);
+  }
+  .helper-overlay h2{font-family:'Tajawal',sans-serif; font-size:clamp(26px,4vw,46px); color:var(--gold); margin:0;}
+  .bars{display:flex; gap:16px; align-items:flex-end; height:180px;}
+  .bar{width:60px; background:linear-gradient(180deg,var(--gold),#a5720f); border-radius:8px 8px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:6px; font-weight:800; font-family:'Tajawal',sans-serif; color:#221a05;}
+
+  .trap-overlay{
+    position:absolute; inset:0; z-index:6; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:radial-gradient(ellipse at center, #4a1018, #1a0509 75%);
+  }
+  .trap-overlay h1{font-family:'Tajawal',sans-serif; font-size:clamp(34px,6vw,64px); color:#ff6b7a; margin:0; text-shadow:0 0 30px #ff2b3d99;}
+  .trap-overlay p{color:#ffb3ba; font-size:16px;}
+
+  .endscreen{
+    position:absolute; inset:0; z-index:7; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:radial-gradient(ellipse at center, #4a3a10, #0B1220 70%);
+  }
+  .endscreen h1{font-family:'Tajawal',sans-serif; font-size:clamp(34px,6vw,70px); color:var(--gold); margin:0; text-shadow:0 0 40px #e8b44099;}
+  .confetti{position:absolute; top:-10px; width:8px; height:16px; opacity:.9; animation:fall linear infinite;}
+  @keyframes fall{ to { transform:translateY(110vh) rotate(400deg); } }
+
+  .empty-state{color:#8ea0bd; text-align:center; font-family:'Tajawal',sans-serif; font-size:22px;}
+  @media (max-width:820px){
+    .stage{flex-direction:column;}
+    .ladder-wrap{flex-direction:row; width:100%; overflow-x:auto; gap:8px;}
+    .ladder-wrap::before{display:none;}
+    .rung{align-self:auto !important;}
+    .rung.side-l::after, .rung.side-r::after{display:none;}
+    .options{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Mobile admin (phone as the presenter's own control panel) ---------- */
+  @media (max-width:640px){
+    #modeSwitch{
+      left:8px; right:8px; top:8px; width:auto;
+      flex-wrap:wrap; justify-content:space-between; gap:6px; padding:8px 10px;
+    }
+    #modeSwitch .gameTag{font-size:11px; order:1; flex-basis:100%; text-align:center;}
+    #modeSwitch .btns{order:2;}
+    #modeSwitch button.leave{order:3;}
+    #admin{padding:96px 10px 40px;}
+    .admin-title{font-size:21px;}
+    .admin-sub{font-size:12px; margin-bottom:16px;}
+    .grid{grid-template-columns:1fr; gap:12px;}
+    .card{padding:14px; border-radius:14px;}
+    .row{flex-direction:column; gap:10px;}
+    .qbank-item{flex-direction:column;}
+    .qbank-actions{align-self:flex-end;}
+    .round-grid{gap:5px;}
+    .round-btn{font-size:12px;}
+    .btnrow{flex-direction:column;}
+    .btnrow button.btn{width:100%;}
+    .reveal-row{flex-direction:column;}
+    .gate-card{padding:20px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>قمة وقاع</h1>
+  <p>أدخل رقم اللعبة. المقدّم يُنشئ رقم اللعبة ويدخل كمقدّم، وشاشة الجمهور تدخل بنفس الرقم لتتزامن معه تلقائياً.</p>
+  <div class="gate-card">
+    <label>رقم اللعبة</label>
+    <input type="text" id="gateGameId" placeholder="مثال: 1" inputmode="numeric">
+    <div id="gateError"></div>
+    <div class="gate-actions">
+      <button class="btn gold" id="gateAdminBtn">إنشاء / دخول كمقدّم</button>
+      <button class="btn teal" id="gateDisplayBtn">دخول كشاشة عرض للجمهور</button>
+    </div>
+  </div>
+</div>
+
+<div id="modeSwitch">
+  <span class="gameTag" id="gameTagLabel"></span>
+  <div class="btns">
+    <button id="btnAdmin" class="active">لوحة التحكم</button>
+    <button id="btnDisplay">شاشة العرض</button>
+  </div>
+  <button class="leave" id="btnLeaveGame">خروج</button>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div id="admin" class="show">
+  <div class="admin-title">قمة وقاع — لوحة تحكم المقدم</div>
+  <div class="admin-sub">البيانات المشتركة (السؤال الحالي، النتيجة، المؤقتات) تُقرأ من كل من يفتح هذه الأداة — تأكد أن شاشة العرض على جهاز/بروجكتر منفصل ولا تتصفح فيه بيانات المقدم.</div>
+
+  <div class="grid">
+    <!-- Question Bank -->
+    <div class="card" style="grid-column:span 2;">
+      <h3><span class="ic">🗂️</span> بنك الأسئلة</h3>
+      <div class="row">
+        <div><label>الجولة</label><input type="number" id="qbRound" min="1" max="10" value="1"></div>
+        <div><label>الفريق</label>
+          <select id="qbTeam"><option value="0">الفريق الأول</option><option value="1">الفريق الثاني</option></select>
+        </div>
+        <div><label>نوع السؤال</label>
+          <select id="qbHasOptions"><option value="yes">باختيارات</option><option value="no">بدون خيارات</option></select>
+        </div>
+      </div>
+      <label>نص السؤال</label>
+      <textarea id="qbText" placeholder="اكتب نص السؤال هنا"></textarea>
+      <div id="qbOptionsWrap">
+        <label>عدد الخيارات</label>
+        <select id="qbOptCount">
+          <option value="2">خياران</option>
+          <option value="3">3 خيارات</option>
+          <option value="4" selected>4 خيارات</option>
+        </select>
+        <div class="row"><div><label>خيار 1</label><input type="text" id="qbOpt0"></div><div><label>خيار 2</label><input type="text" id="qbOpt1"></div></div>
+        <div class="row"><div id="qbOpt2Wrap"><label>خيار 3</label><input type="text" id="qbOpt2"></div><div id="qbOpt3Wrap"><label>خيار 4</label><input type="text" id="qbOpt3"></div></div>
+        <label>رقم الخيار الصحيح</label><input type="number" id="qbCorrect" min="1" max="4" value="1">
+      </div>
+      <label>الإجابة الصحيحة (بدون خيارات)</label>
+      <input type="text" id="qbAnswerText" placeholder="نص الإجابة الصحيحة">
+      <div class="btnrow">
+        <button class="btn gold" id="qbSave">حفظ السؤال</button>
+        <button class="btn ghost" id="qbClear">تفريغ الحقول</button>
+      </div>
+      <div style="margin-top:16px; max-height:260px; overflow:auto;" id="qbList"></div>
+    </div>
+
+    <!-- Round picker + timer -->
+    <div class="card">
+      <h3><span class="ic">🎯</span> مُنتقي الأسئلة والمؤقت</h3>
+      <label>اختر رقم الجولة لعرضها على الجمهور</label>
+      <div class="round-grid" id="roundGrid"></div>
+      <div class="btnrow"><button class="btn gold" id="pushQuestion">إظهار السؤال في شاشة الجمهور</button></div>
+
+      <div style="margin-top:18px; border-top:1px solid var(--line); padding-top:14px;">
+        <label>مدة السؤال (ثانية)</label>
+        <input type="number" id="timerDuration" value="30" min="5" step="5">
+        <div class="timer-display" id="timerReadout">00:30</div>
+        <div class="btnrow">
+          <button class="btn teal" id="timerStart">بدء</button>
+          <button class="btn" id="timerPause">إيقاف مؤقت</button>
+          <button class="btn crimson" id="timerReset">إعادة تعيين</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Helpers -->
+    <div class="card">
+      <h3><span class="ic">🛟</span> أدوات المساعدة</h3>
+      <div class="helper-row">
+        <div class="helper-name"><span class="dot" id="dotAudience"></span> تصويت الجمهور</div>
+        <button class="btn small" id="btnAudience">تفعيل (60ث)</button>
+      </div>
+      <div class="helper-row">
+        <div class="helper-name"><span class="dot" id="dotPhone"></span> اتصال بصديق</div>
+        <button class="btn small" id="btnPhone">تفعيل (60ث)</button>
+      </div>
+      <div class="helper-row">
+        <div class="helper-name"><span class="dot" id="dotRemove"></span> حذف خيارين</div>
+        <button class="btn small" id="btnRemove">تفعيل</button>
+      </div>
+    </div>
+
+    <!-- Trap management -->
+    <div class="card">
+      <h3><span class="ic">🕳️</span> إدارة الحفر</h3>
+      <div id="teamTrapConfig"></div>
+      <div class="btnrow">
+        <button class="btn crimson" id="btnActivateTrapLastChance">تفعيل الحفرة: تحدي النجاة</button>
+        <button class="btn crimson" id="btnActivateTrapReset">تفعيل الحفرة: تصفير الرصيد</button>
+      </div>
+      <div class="warn" id="trapAlert" style="display:none;"></div>
+    </div>
+
+    <!-- Teams & Score -->
+    <div class="card">
+      <h3><span class="ic">🏳️</span> الفرق والرصيد</h3>
+      <div id="teamsWrap"></div>
+      <div class="btnrow">
+        <button class="btn" id="btnAdvance1">تقدم خطوة واحدة</button>
+        <button class="btn" id="btnAdvance2">تقدم خطوتين</button>
+        <button class="btn ghost" id="btnSwitchTeam">تبديل الفريق النشط</button>
+      </div>
+    </div>
+
+    <!-- Reveal -->
+    <div class="card">
+      <h3><span class="ic">📣</span> إعلان النتيجة</h3>
+      <p style="font-size:13px;color:#9fb0c9;">لن تظهر صح/خطأ على شاشة الجمهور إلا بعد الضغط هنا.</p>
+      <div id="answerPickerWrap" style="display:none;">
+        <label>إجابة الفريق (اضغط الخيار الذي اختاره ليظهر بالأصفر عند الجمهور)</label>
+        <div class="answer-picker" id="answerPicker"></div>
+      </div>
+      <div class="reveal-row">
+        <button class="btn teal" id="revealCorrect">إعلان: إجابة صحيحة ✅</button>
+        <button class="btn crimson" id="revealWrong">إعلان: إجابة خاطئة ❌</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn ghost" id="revealClear">إخفاء الإعلان / سؤال جديد</button>
+        <button class="btn gold" id="btnGameOver">إعلان الفوز النهائي 🏆</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DISPLAY ================= -->
+<div id="display">
+  <div class="mountain-bg"></div>
+  <div class="stars"></div>
+  <div class="stage" id="stage">
+    <div class="ladder-wrap" id="ladderWrap"></div>
+    <div class="main-col" id="mainCol">
+      <div class="empty-state">في انتظار المقدّم لبدء السؤال…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   STATE MODEL
+   ============================================================ */
+const SCORES = [50,100,150,200,250,300,350,400,450,500];
+
+function defaultState(){
+  return {
+    round: null,
+    question: null, // {text, options:[], hasOptions}
+    timer: {duration:30, endTs:null, running:false, remaining:30},
+    helpers: {
+      audience:{active:false, endTs:null},
+      phone:{active:false, endTs:null},
+      remove:{active:false}
+    },
+    trapEvent: {active:false, type:null, team:null, endTs:null}, // type: lastchance|reset
+    reveal: {shown:false, correct:null},
+    selectedOption: null,
+    teams: [
+      {name:'الفريق الأول', roundIndex:-1, eliminated:false, holes:[3,7]},
+      {name:'الفريق الثاني', roundIndex:-1, eliminated:false, holes:[4,8]}
+    ],
+    activeTeam: 0,
+    gameOver:false
+  };
+}
+
+let state = defaultState();
+let questionBank = {}; // {round: {0:{text,options,correctIndex,hasOptions,answerText}, 1:{...}}}
+let mode = 'admin';
+let helperTickHandle = null;
+let gameId = null;
+
+/* ============================================================
+   STORAGE HELPERS (scoped to the current game number)
+   ============================================================ */
+function stateKey(){ return 'quiz-state-'+gameId; }
+function bankKey(){ return 'quiz-questions-'+gameId; }
+
+async function saveState(){
+  if(!gameId) return;
+  try{ await window.storage.set(stateKey(), JSON.stringify(state), true); }
+  catch(e){ console.error('save state failed', e); }
+}
+async function loadState(){
+  if(!gameId) return;
+  try{
+    const r = await window.storage.get(stateKey(), true);
+    if(r && r.value) state = JSON.parse(r.value);
+  }catch(e){ /* no state yet */ }
+}
+async function saveBank(){
+  if(!gameId) return;
+  try{ await window.storage.set(bankKey(), JSON.stringify(questionBank), false); }
+  catch(e){ console.error('save bank failed', e); }
+}
+async function loadBank(){
+  if(!gameId) return;
+  try{
+    const r = await window.storage.get(bankKey(), false);
+    if(r && r.value) questionBank = JSON.parse(r.value);
+  }catch(e){ questionBank = {}; }
+}
+
+/* ============================================================
+   GAME GATE (create / join a numbered game)
+   ============================================================ */
+function normalizeGameId(v){
+  const t = (v||'').trim();
+  if(!t) return null;
+  return t.replace(/\s+/g,'').toLowerCase();
+}
+document.getElementById('gateAdminBtn').onclick = ()=> enterGame('admin');
+document.getElementById('gateDisplayBtn').onclick = ()=> enterGame('display');
+document.getElementById('gateGameId').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') enterGame('admin');
+});
+document.getElementById('btnLeaveGame').onclick = ()=>{
+  gameId = null;
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('modeSwitch').style.display='none';
+  document.getElementById('admin').classList.remove('show');
+  document.getElementById('display').classList.remove('show');
+  document.getElementById('gateGameId').value='';
+  document.getElementById('gateError').textContent='';
+};
+async function enterGame(targetMode){
+  const id = normalizeGameId(document.getElementById('gateGameId').value);
+  if(!id){ document.getElementById('gateError').textContent='اكتب رقم لعبة صالح'; return; }
+  gameId = id;
+  state = defaultState();
+  questionBank = {};
+  await loadBank();
+  await loadState();
+  document.getElementById('gate').style.display='none';
+  document.getElementById('modeSwitch').style.display='flex';
+  document.getElementById('gameTagLabel').textContent = 'لعبة رقم '+id;
+  setMode(targetMode);
+}
+
+/* ============================================================
+   MODE SWITCH
+   ============================================================ */
+document.getElementById('btnAdmin').onclick = ()=> setMode('admin');
+document.getElementById('btnDisplay').onclick = ()=> setMode('display');
+function setMode(m){
+  mode = m;
+  document.getElementById('admin').classList.toggle('show', m==='admin');
+  document.getElementById('display').classList.toggle('show', m==='display');
+  document.getElementById('btnAdmin').classList.toggle('active', m==='admin');
+  document.getElementById('btnDisplay').classList.toggle('active', m==='display');
+  if(m==='admin') renderAdmin();
+  else renderDisplay();
+}
+
+/* ============================================================
+   QUESTION BANK UI
+   ============================================================ */
+document.getElementById('qbHasOptions').addEventListener('change', (e)=>{
+  document.getElementById('qbOptionsWrap').style.display = e.target.value==='yes' ? 'block':'none';
+  document.getElementById('qbAnswerText').style.display = e.target.value==='yes' ? 'none':'block';
+});
+document.getElementById('qbAnswerText').style.display = 'none';
+
+function applyOptCount(count){
+  document.getElementById('qbOpt2Wrap').style.display = count>=3 ? 'block':'none';
+  document.getElementById('qbOpt3Wrap').style.display = count>=4 ? 'block':'none';
+  document.getElementById('qbCorrect').max = count;
+  const cur = parseInt(document.getElementById('qbCorrect').value)||1;
+  if(cur>count) document.getElementById('qbCorrect').value = count;
+}
+document.getElementById('qbOptCount').addEventListener('change', (e)=>{
+  applyOptCount(parseInt(e.target.value));
+});
+applyOptCount(4);
+
+document.getElementById('qbClear').onclick = ()=>{
+  ['qbText','qbOpt0','qbOpt1','qbOpt2','qbOpt3','qbAnswerText'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('qbCorrect').value=1;
+  document.getElementById('qbOptCount').value='4';
+  applyOptCount(4);
+};
+
+document.getElementById('qbSave').onclick = async ()=>{
+  const round = parseInt(document.getElementById('qbRound').value);
+  if(!round || round<1 || round>10){ alert('اختر رقم جولة بين 1 و 10'); return; }
+  const team = parseInt(document.getElementById('qbTeam').value);
+  const hasOptions = document.getElementById('qbHasOptions').value === 'yes';
+  const text = document.getElementById('qbText').value.trim();
+  if(!text){ alert('اكتب نص السؤال'); return; }
+  let q = {text, hasOptions};
+  if(hasOptions){
+    const count = parseInt(document.getElementById('qbOptCount').value);
+    const opts = [];
+    for(let i=0;i<count;i++) opts.push(document.getElementById('qbOpt'+i).value.trim());
+    if(opts.some(o=>!o)){ alert('املأ كل الخيارات ('+count+')'); return; }
+    q.options = opts;
+    q.correctIndex = parseInt(document.getElementById('qbCorrect').value)-1;
+  } else {
+    const ans = document.getElementById('qbAnswerText').value.trim();
+    if(!ans){ alert('اكتب الإجابة الصحيحة'); return; }
+    q.answerText = ans;
+  }
+  questionBank[round] = questionBank[round] || {};
+  questionBank[round][team] = q;
+  await saveBank();
+  renderQBList();
+  renderRoundGrid();
+  document.getElementById('qbClear').onclick();
+  document.getElementById('qbRound').value = round;
+};
+
+const TEAM_LABELS = ['الفريق الأول','الفريق الثاني'];
+
+function renderQBList(){
+  const wrap = document.getElementById('qbList');
+  wrap.innerHTML='';
+  Object.keys(questionBank).sort((a,b)=>a-b).forEach(r=>{
+    [0,1].forEach(team=>{
+      const q = questionBank[r][team];
+      if(!q) return;
+      const div = document.createElement('div');
+      div.className='qbank-item';
+      div.innerHTML = `
+        <div>
+          <div><b>جولة ${r} — ${escapeHtml(TEAM_LABELS[team])}</b> — ${escapeHtml(q.text)}</div>
+          <div class="meta">${q.hasOptions ? 'خيارات: '+q.options.map(escapeHtml).join(' / ')+' — الصحيح: '+(q.correctIndex+1) : 'إجابة: '+escapeHtml(q.answerText)}</div>
+        </div>
+        <div class="qbank-actions">
+          <button class="btn small" data-edit="${r}:${team}">تعديل</button>
+          <button class="btn small crimson" data-del="${r}:${team}">حذف</button>
+        </div>`;
+      wrap.appendChild(div);
+    });
+  });
+  wrap.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const [r,team] = b.dataset.del.split(':');
+    delete questionBank[r][team];
+    await saveBank(); renderQBList(); renderRoundGrid();
+  });
+  wrap.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+    const [r,team] = b.dataset.edit.split(':');
+    const q = questionBank[r][team];
+    document.getElementById('qbRound').value = r;
+    document.getElementById('qbTeam').value = team;
+    document.getElementById('qbHasOptions').value = q.hasOptions ? 'yes':'no';
+    document.getElementById('qbHasOptions').dispatchEvent(new Event('change'));
+    document.getElementById('qbText').value = q.text;
+    if(q.hasOptions){
+      document.getElementById('qbOptCount').value = String(q.options.length);
+      applyOptCount(q.options.length);
+      ['qbOpt0','qbOpt1','qbOpt2','qbOpt3'].forEach(id=>document.getElementById(id).value='');
+      q.options.forEach((o,i)=>document.getElementById('qbOpt'+i).value=o);
+      document.getElementById('qbCorrect').value = q.correctIndex+1;
+    } else {
+      document.getElementById('qbAnswerText').value = q.answerText;
+    }
+  });
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   ROUND PICKER
+   ============================================================ */
+function renderRoundGrid(){
+  const wrap = document.getElementById('roundGrid');
+  wrap.innerHTML='';
+  for(let r=1;r<=10;r++){
+    const btn = document.createElement('div');
+    btn.className='round-btn'+(state.round===r?' active':'');
+    const trapTeamA = state.teams[0].holes.includes(r);
+    const trapTeamB = state.teams[1].holes.includes(r);
+    if(trapTeamA) btn.classList.add('trap-a');
+    if(trapTeamB) btn.classList.add('trap-b');
+    btn.textContent = r+' · '+SCORES[r-1];
+    btn.onclick = ()=>{ state.round = r; renderRoundGrid(); checkTrapAlert(); };
+    wrap.appendChild(btn);
+  }
+}
+document.getElementById('pushQuestion').onclick = async ()=>{
+  if(!state.round){ alert('اختر رقم جولة أولاً'); return; }
+  const team = state.activeTeam;
+  const q = questionBank[state.round] ? questionBank[state.round][team] : null;
+  if(!q){ alert('لا يوجد سؤال محفوظ لـ '+TEAM_LABELS[team]+' في هذه الجولة بعد'); return; }
+  state.question = {text:q.text, hasOptions:q.hasOptions, options: q.hasOptions? q.options: null, removed:[], team:team};
+  state.reveal = {shown:false, correct:null};
+  state.selectedOption = null;
+  state.helpers = {audience:{active:false,endTs:null}, phone:{active:false,endTs:null}, remove:{active:false}};
+  resetTimerObj();
+  await saveState();
+  renderAdmin();
+};
+
+function checkTrapAlert(){
+  const alertEl = document.getElementById('trapAlert');
+  const at = state.teams[state.activeTeam];
+  if(at && state.round && at.holes.includes(state.round) && !at.eliminated){
+    alertEl.style.display='block';
+    alertEl.textContent = '⚠️ تنبيه: '+at.name+' وصل إلى جولة الحفرة رقم '+state.round;
+  } else {
+    alertEl.style.display='none';
+  }
+}
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+function resetTimerObj(){
+  const dur = parseInt(document.getElementById('timerDuration').value)||30;
+  state.timer = {duration:dur, endTs:null, running:false, remaining:dur};
+}
+document.getElementById('timerStart').onclick = async ()=>{
+  const dur = parseInt(document.getElementById('timerDuration').value)||30;
+  if(!state.timer.running){
+    const remain = state.timer.remaining ?? dur;
+    state.timer.duration = dur;
+    state.timer.endTs = Date.now() + remain*1000;
+    state.timer.running = true;
+    await saveState();
+  }
+};
+document.getElementById('timerPause').onclick = async ()=>{
+  if(state.timer.running){
+    state.timer.remaining = Math.max(0, Math.round((state.timer.endTs - Date.now())/1000));
+    state.timer.running = false;
+    await saveState();
+  }
+};
+document.getElementById('timerReset').onclick = async ()=>{
+  resetTimerObj();
+  await saveState();
+  renderAdmin();
+};
+
+function computeRemaining(t){
+  if(!t) return 0;
+  if(t.running && t.endTs) return Math.max(0, Math.round((t.endTs - Date.now())/1000));
+  return t.remaining ?? t.duration;
+}
+function fmtTime(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+document.getElementById('btnAudience').onclick = async ()=>{
+  state.helpers.audience = {active:true, endTs:Date.now()+60000};
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnPhone').onclick = async ()=>{
+  state.helpers.phone = {active:true, endTs:Date.now()+60000};
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnRemove').onclick = async ()=>{
+  if(!state.question || !state.question.hasOptions){ alert('لا يوجد سؤال بخيارات معروض حالياً'); return; }
+  const total = state.question.options.length;
+  const removeCount = Math.max(0, total-2);
+  if(removeCount<=0){ alert('هذا السؤال فيه خياران فقط، لا يوجد ما يُحذف'); return; }
+  const correct = questionBank[state.round]?.[state.question.team]?.correctIndex ?? 0;
+  const wrongIdx = Array.from({length:total},(_,i)=>i).filter(i=>i!==correct);
+  const toRemove = wrongIdx.sort(()=>Math.random()-0.5).slice(0,removeCount);
+  state.question.removed = toRemove;
+  state.helpers.remove = {active:true};
+  await saveState(); renderAdmin();
+};
+
+/* ============================================================
+   TRAP MANAGEMENT
+   ============================================================ */
+function renderTrapConfig(){
+  const wrap = document.getElementById('teamTrapConfig');
+  wrap.innerHTML='';
+  state.teams.forEach((t,ti)=>{
+    const div = document.createElement('div');
+    div.style.marginBottom='10px';
+    div.innerHTML = `<label>حفرتا ${escapeHtml(t.name)} (رقمي جولة من 1-10)</label>
+      <div class="row">
+        <input type="number" min="1" max="10" value="${t.holes[0]}" data-team="${ti}" data-hole="0">
+        <input type="number" min="1" max="10" value="${t.holes[1]}" data-team="${ti}" data-hole="1">
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('input').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const ti = parseInt(inp.dataset.team), hi = parseInt(inp.dataset.hole);
+      state.teams[ti].holes[hi] = parseInt(inp.value)||1;
+      await saveState(); renderRoundGrid(); checkTrapAlert();
+    };
+  });
+}
+document.getElementById('btnActivateTrapLastChance').onclick = async ()=>{
+  const at = state.activeTeam;
+  state.trapEvent = {active:true, type:'lastchance', team:at, endTs:Date.now()+15000};
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnActivateTrapReset').onclick = async ()=>{
+  const at = state.activeTeam;
+  state.teams[at].roundIndex = -1;
+  state.trapEvent = {active:true, type:'reset', team:at, endTs:Date.now()+6000};
+  await saveState(); renderAdmin();
+};
+
+/* ============================================================
+   TEAMS / SCORE
+   ============================================================ */
+function renderTeams(){
+  const wrap = document.getElementById('teamsWrap');
+  wrap.innerHTML='';
+  state.teams.forEach((t,ti)=>{
+    const score = t.roundIndex>=0 ? SCORES[t.roundIndex] : 0;
+    const div = document.createElement('div');
+    div.className='team-box';
+    div.innerHTML = `
+      <div class="th">
+        <input type="text" value="${escapeHtml(t.name)}" data-name="${ti}">
+        <span class="score-tag">${score}</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; font-size:12px; color:#9fb0c9;">
+        <label style="margin:0;"><input type="checkbox" ${ti===state.activeTeam?'checked':''} data-active="${ti}"> نشط الآن</label>
+        <label style="margin:0;"><input type="checkbox" ${t.eliminated?'checked':''} data-elim="${ti}"> خرج من المسابقة</label>
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('[data-name]').forEach(inp=>inp.onchange=async()=>{
+    state.teams[inp.dataset.name].name = inp.value; await saveState(); renderAdmin();
+  });
+  wrap.querySelectorAll('[data-active]').forEach(inp=>inp.onchange=async()=>{
+    state.activeTeam = parseInt(inp.dataset.active); await saveState(); renderAdmin();
+  });
+  wrap.querySelectorAll('[data-elim]').forEach(inp=>inp.onchange=async()=>{
+    state.teams[inp.dataset.elim].eliminated = inp.checked; await saveState(); renderAdmin();
+  });
+}
+document.getElementById('btnSwitchTeam').onclick = async ()=>{
+  state.activeTeam = state.activeTeam===0?1:0; await saveState(); renderAdmin();
+};
+document.getElementById('btnAdvance1').onclick = ()=>advance(1);
+document.getElementById('btnAdvance2').onclick = ()=>advance(2);
+async function advance(steps){
+  const t = state.teams[state.activeTeam];
+  t.roundIndex = Math.min(9, t.roundIndex + steps);
+  await saveState(); renderAdmin();
+}
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+document.getElementById('revealCorrect').onclick = async ()=>{
+  state.reveal = {shown:true, correct:true}; await saveState(); renderAdmin();
+};
+document.getElementById('revealWrong').onclick = async ()=>{
+  state.reveal = {shown:true, correct:false}; await saveState(); renderAdmin();
+};
+document.getElementById('revealClear').onclick = async ()=>{
+  state.reveal = {shown:false, correct:null}; state.question=null; state.round=null; state.selectedOption=null;
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnGameOver').onclick = async ()=>{
+  state.gameOver = true; await saveState(); renderAdmin();
+};
+
+/* ============================================================
+   ADMIN RENDER
+   ============================================================ */
+function renderAdmin(){
+  renderQBList();
+  renderRoundGrid();
+  renderTrapConfig();
+  renderTeams();
+  renderAnswerPicker();
+  checkTrapAlert();
+  document.getElementById('timerDuration').value = state.timer.duration;
+  document.getElementById('timerReadout').textContent = fmtTime(computeRemaining(state.timer));
+  document.getElementById('dotAudience').classList.toggle('on', !!state.helpers.audience.active && computeRemaining(state.helpers.audience)>0);
+  document.getElementById('dotPhone').classList.toggle('on', !!state.helpers.phone.active && computeRemaining(state.helpers.phone)>0);
+  document.getElementById('dotRemove').classList.toggle('on', !!state.helpers.remove.active);
+}
+
+function renderAnswerPicker(){
+  const wrap = document.getElementById('answerPickerWrap');
+  const box = document.getElementById('answerPicker');
+  if(!state.question || !state.question.hasOptions){
+    wrap.style.display='none';
+    return;
+  }
+  wrap.style.display='block';
+  box.innerHTML='';
+  state.question.options.forEach((opt,i)=>{
+    if((state.question.removed||[]).includes(i)) return;
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.className = state.selectedOption===i ? 'picked':'';
+    btn.disabled = !!state.reveal.shown;
+    btn.onclick = async ()=>{
+      state.selectedOption = i;
+      await saveState(); renderAdmin();
+    };
+    box.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   DISPLAY RENDER
+   ============================================================ */
+function renderDisplay(){
+  const mainCol = document.getElementById('mainCol');
+  const ladderWrap = document.getElementById('ladderWrap');
+
+  // Game over screen
+  if(state.gameOver){
+    mainCol.innerHTML = '';
+    ladderWrap.innerHTML = '';
+    const winners = state.teams.filter(t=>!t.eliminated).map(t=>t.name).join(' و ');
+    document.getElementById('stage').innerHTML = `
+      <div class="endscreen" id="endscreen">
+        <h1>🏆 مبروك ${escapeHtml(winners||'')} 🏆</h1>
+        <div style="font-family:'Tajawal',sans-serif; font-size:22px; color:var(--gold-soft);">تم الوصول إلى القمة — 500</div>
+      </div>`;
+    spawnConfetti();
+    return;
+  } else {
+    // rebuild base stage structure if it was replaced by endscreen previously
+    if(!document.getElementById('ladderWrap')){
+      document.getElementById('stage').innerHTML = `<div class="ladder-wrap" id="ladderWrap"></div><div class="main-col" id="mainCol"></div>`;
+    }
+  }
+
+  // ladder — vertical mountain trail, alternating left/right, score-only (no "round" wording)
+  const lw = document.getElementById('ladderWrap');
+  lw.innerHTML='';
+  for(let r=1;r<=10;r++){
+    const div = document.createElement('div');
+    let cls='rung '+(r%2===1?'side-l':'side-r');
+    const isCurrent = state.round===r;
+    const anyoneReached = state.teams.some(t=>t.roundIndex+1>=r);
+    if(isCurrent) cls+=' current'; else if(anyoneReached) cls+=' reached';
+    if(state.teams.some(t=>t.holes.includes(r))) cls+=' trap-mark';
+    if(r===10) cls+=' peak';
+    div.className=cls;
+    let flags='';
+    state.teams.forEach((t,ti)=>{ if(t.roundIndex+1===r) flags += ti===0?'🔵':'🔴'; });
+    div.innerHTML = `<span class="val">${SCORES[r-1]}</span><span class="idx">${r}</span>${flags?'<span class="flag">'+flags+'</span>':''}`;
+    lw.appendChild(div);
+  }
+
+  const mc = document.getElementById('mainCol');
+
+  // trap overlay
+  if(state.trapEvent && state.trapEvent.active){
+    const remain = computeRemaining(state.trapEvent);
+    const teamName = state.teams[state.trapEvent.team]?.name || '';
+    if(state.trapEvent.type==='lastchance'){
+      mc.innerHTML = `<div class="trap-overlay"><h1>⚠️ تحدي النجاة</h1><p>${escapeHtml(teamName)} وقع في الحفرة!</p>
+        <div class="timer-ring ${remain<=5?'low':''}">${remain}</div></div>`;
+      if(remain<=0){ state.trapEvent.active=false; }
+    } else {
+      mc.innerHTML = `<div class="trap-overlay"><h1>💥 تصفير الرصيد</h1><p>${escapeHtml(teamName)} سقط في الحفرة وعاد رصيده للصفر</p></div>`;
+      if(remain<=0){ state.trapEvent.active=false; }
+    }
+    return;
+  }
+
+  // teams bar + timer + question
+  let html = '<div class="teams-bar">';
+  state.teams.forEach((t,ti)=>{
+    const score = t.roundIndex>=0?SCORES[t.roundIndex]:0;
+    const playing = state.question && state.question.team===ti;
+    html += `<div class="team-pill ${t.eliminated?'eliminated':''}" style="${playing?'border-color:'+(ti===0?'#3aa0ff':'var(--crimson)')+'; box-shadow:0 0 18px '+(ti===0?'#3aa0ff55':'#b23a4855')+';':''}"><div class="nm">${escapeHtml(t.name)}</div><div class="sc">${score}</div></div>`;
+  });
+  html += '</div>';
+
+  if(!state.question){
+    mc.innerHTML = html + '<div class="empty-state">في انتظار المقدّم لبدء السؤال…</div>';
+    return;
+  }
+
+  const playingTeam = state.teams[state.question.team];
+  const currentScore = playingTeam.roundIndex>=0 ? SCORES[playingTeam.roundIndex] : 0;
+  html += `<div class="team-badge t${state.question.team}">
+      <div class="tb-avatar">${state.question.team===0?'🔵':'🔴'}</div>
+      <div class="tb-info">
+        <div class="tb-name">دور ${escapeHtml(playingTeam.name)}</div>
+        <div class="tb-level">رصيدهم الحالي <b>${currentScore}</b> — يلعبون الآن على مستوى <b>${SCORES[state.round-1]}</b></div>
+      </div>
+    </div>`;
+
+  const tRemain = computeRemaining(state.timer);
+  html += `<div class="timer-ring ${tRemain<=5?'low':''}">${tRemain}</div>`;
+  html += `<div class="qcard"><div class="qtext">${escapeHtml(state.question.text)}</div></div>`;
+
+  if(state.question.hasOptions){
+    html += '<div class="options">';
+    const correctIdx = questionBank[state.round]?.[state.question.team]?.correctIndex;
+    state.question.options.forEach((opt,i)=>{
+      const removed = (state.question.removed||[]).includes(i);
+      let cls='opt'+(removed?' removed':'');
+      if(state.reveal.shown){
+        if(i===correctIdx) cls+=' correct-flash';
+        else if(state.selectedOption===i && state.reveal.correct===false) cls+=' wrong-flash';
+      } else if(state.selectedOption===i){
+        cls+=' selected-flash';
+      }
+      html += `<div class="${cls}">${escapeHtml(opt)}</div>`;
+    });
+    html += '</div>';
+  }
+
+  if(state.reveal.shown){
+    html += `<div class="reveal-banner ${state.reveal.correct?'ok':'no'}">${state.reveal.correct?'إجابة صحيحة ✅':'إجابة خاطئة ❌'}</div>`;
+  }
+
+  mc.innerHTML = html;
+
+  // helper overlays layered on top (audience poll / phone a friend)
+  const stage = document.getElementById('stage');
+  let overlayEl = document.getElementById('helperOverlay');
+  if(overlayEl) overlayEl.remove();
+  if(state.helpers.audience.active && computeRemaining(state.helpers.audience)>0){
+    const remain = computeRemaining(state.helpers.audience);
+    const bars = (state.question.options||[]).map((o,i)=>{
+      const h = 40+Math.floor(Math.random()*140);
+      return `<div class="bar" style="height:${h}px;">${Math.floor((h/180)*100)}%</div>`;
+    }).join('');
+    const div = document.createElement('div');
+    div.id='helperOverlay'; div.className='helper-overlay';
+    div.innerHTML = `<h2>📊 تصويت الجمهور — ${remain} ث</h2><div class="bars">${bars}</div>`;
+    stage.appendChild(div);
+  } else if(state.helpers.phone.active && computeRemaining(state.helpers.phone)>0){
+    const remain = computeRemaining(state.helpers.phone);
+    const div = document.createElement('div');
+    div.id='helperOverlay'; div.className='helper-overlay';
+    div.innerHTML = `<h2>📞 اتصال بصديق — ${remain} ث</h2><div class="timer-ring">${remain}</div>`;
+    stage.appendChild(div);
+  }
+}
+
+function spawnConfetti(){
+  const stage = document.getElementById('stage');
+  const colors=['#E8B440','#1F6F63','#F2EFE6','#B23A48'];
+  for(let i=0;i<40;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    c.style.left = Math.random()*100+'%';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration = (2+Math.random()*2)+'s';
+    c.style.animationDelay = (Math.random()*1.5)+'s';
+    stage.appendChild(c);
+  }
+}
+
+/* ============================================================
+   POLLING LOOP (keeps display + admin roughly in sync)
+   ============================================================ */
+let lastStateStr = '';
+async function pollLoop(){
+  await loadState();
+  if(mode==='display') renderDisplay();
+}
+async function tickLoop(){
+  // local re-render for smooth countdown without refetching every 250ms
+  if(mode==='display') renderDisplay();
+  if(mode==='admin') renderAdmin();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init(){
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('modeSwitch').style.display='none';
+  setInterval(pollLoop, 1200);
+  setInterval(tickLoop, 250);
+})();
+</script>
+</body>
+</html>
