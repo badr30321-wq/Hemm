@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قمة وقاع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0B1220;
+    --midnight-2:#111a2b;
+    --gold:#E8B440;
+    --gold-soft:#f3d488;
+    --teal:#1F6F63;
+    --crimson:#B23A48;
+    --mist:#F2EFE6;
+    --fog:#4A5568;
+    --panel:#152137;
+    --panel-2:#1b2a45;
+    --line:#26385a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Cairo',sans-serif;
+    background:var(--midnight);
+    color:var(--mist);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .display-font{font-family:'Tajawal',sans-serif;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+  /* ---------- Mode switcher ---------- */
+  #modeSwitch{
+    position:fixed; top:10px; left:10px; z-index:999;
+    display:none; gap:10px; align-items:center; background:rgba(11,18,32,.85);
+    padding:6px 6px 6px 12px; border-radius:10px; border:1px solid var(--line);
+    backdrop-filter:blur(6px);
+  }
+  #modeSwitch .btns{display:flex; gap:6px;}
+  #modeSwitch button{
+    font-family:'Cairo',sans-serif; font-size:12px; font-weight:700;
+    padding:6px 10px; border-radius:7px; border:none; cursor:pointer;
+    background:transparent; color:#9fb0c9;
+  }
+  #modeSwitch button.active{background:var(--gold); color:#221a05;}
+  #modeSwitch .gameTag{font-family:'Tajawal',sans-serif; font-size:12px; color:var(--gold-soft); font-weight:800;}
+  #modeSwitch button.leave{color:#ff8b93;}
+
+  /* ---------- Gate screen ---------- */
+  #gate{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:22px;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(232,180,64,.18), transparent 60%),
+      linear-gradient(180deg, #0B1220 0%, #0d1a2e 55%, #0a1420 100%);
+    padding:24px; text-align:center;
+  }
+  #gate h1{font-family:'Tajawal',sans-serif; font-weight:900; font-size:clamp(28px,4vw,44px); color:var(--gold); margin:0;}
+  #gate p{color:#9fb0c9; font-size:14px; max-width:440px; margin:0;}
+  .gate-card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--line);
+    border-radius:18px; padding:26px; width:min(380px,90%);
+  }
+  .gate-card label{text-align:right;}
+  .gate-card input{
+    text-align:center; font-family:'Tajawal',sans-serif; font-weight:800; font-size:20px; letter-spacing:2px;
+  }
+  .gate-actions{display:flex; flex-direction:column; gap:10px; margin-top:16px;}
+  .gate-actions button{width:100%; padding:12px; font-size:14px;}
+  #gateError{color:var(--crimson); font-size:12px; font-weight:700; min-height:16px;}
+
+  /* ================= ADMIN ================= */
+  #admin{display:none; padding:64px 18px 40px; max-width:1400px; margin:0 auto;}
+  #admin.show{display:block;}
+  .admin-title{font-family:'Tajawal',sans-serif; font-weight:900; font-size:26px; color:var(--gold); margin:0 0 4px;}
+  .admin-sub{color:#8ea0bd; font-size:13px; margin:0 0 22px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px;}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line); border-radius:16px; padding:18px;
+  }
+  .card h3{
+    font-family:'Tajawal',sans-serif; margin:0 0 12px; font-size:16px; color:var(--gold-soft);
+    display:flex; align-items:center; gap:8px;
+  }
+  .card h3 .ic{font-size:18px;}
+  label{font-size:12px; color:#9fb0c9; display:block; margin:10px 0 4px;}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; padding:11px 10px; border-radius:8px; border:1px solid var(--line);
+    background:#0e1626; color:var(--mist); font-family:'Cairo',sans-serif; font-size:16px;
+  }
+  textarea{resize:vertical; min-height:50px;}
+  .row{display:flex; gap:8px;}
+  .row > *{flex:1;}
+  button.btn{
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:14px; cursor:pointer;
+    padding:11px 14px; border-radius:9px; border:1px solid var(--line);
+    background:#1c2b47; color:var(--mist); transition:.15s; min-height:42px;
+  }
+  button.btn:hover{background:#233555;}
+  button.btn.gold{background:var(--gold); color:#221a05; border-color:var(--gold);}
+  button.btn.gold:hover{background:var(--gold-soft);}
+  button.btn.teal{background:var(--teal); color:#eafff9; border-color:var(--teal);}
+  button.btn.crimson{background:var(--crimson); color:#fff; border-color:var(--crimson);}
+  button.btn.ghost{background:transparent;}
+  button.btn.small{padding:6px 9px; font-size:12px;}
+  button.btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+
+  .qbank-item{
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px; font-size:13px;
+  }
+  .qbank-item .meta{color:#8ea0bd; font-size:11px;}
+  .qbank-actions{display:flex; gap:6px; flex-shrink:0;}
+
+  .round-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px;}
+  .round-btn{
+    padding:10px 0; text-align:center; border-radius:9px; border:1px solid var(--line);
+    background:#0e1626; cursor:pointer; font-weight:700; font-family:'Tajawal',sans-serif; font-size:13px;
+    position:relative; min-height:44px; display:flex; align-items:center; justify-content:center;
+  }
+  .round-btn.active{background:var(--gold); color:#221a05; border-color:var(--gold);}
+  .round-btn.trap-a::after, .round-btn.trap-b::after{
+    content:''; position:absolute; top:-4px; left:-4px; width:8px; height:8px; border-radius:50%;
+  }
+  .round-btn.trap-a::after{background:#3aa0ff;}
+  .round-btn.trap-b::after{background:var(--crimson);}
+
+  .team-box{border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;}
+  .team-box .th{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .team-box .th input{width:auto; flex:1; font-weight:700; font-family:'Tajawal',sans-serif;}
+  .score-tag{font-family:'Tajawal',sans-serif; font-weight:900; color:var(--gold); font-size:18px;}
+  .warn{color:var(--crimson); font-weight:700; font-size:12px; margin-top:6px;}
+  .trap-alert-box{
+    background:linear-gradient(160deg,#3a1218,#1a0509); border:1px solid var(--crimson); border-radius:12px;
+    padding:12px; margin-top:10px; color:#ffb3ba; font-weight:700; font-size:13px;
+  }
+  .resolve-panel{
+    background:linear-gradient(160deg,#2a2308,#1a1608); border:2px solid var(--gold); border-radius:12px;
+    padding:12px; margin-top:10px;
+  }
+  .resolve-panel p{color:var(--gold-soft); font-weight:800; font-size:13px; margin:0 0 8px;}
+  .withdraw-btn{background:#2a2440; border-color:#4a3f7a; color:#d8cfff;}
+  .withdraw-btn:hover{background:#352c55;}
+
+  .timer-display{
+    font-family:'Tajawal',sans-serif; font-weight:900; font-size:34px; text-align:center;
+    color:var(--gold); background:#0e1626; border-radius:12px; padding:10px; margin-bottom:10px; letter-spacing:2px;
+  }
+
+  .helper-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed var(--line);}
+  .helper-row:last-child{border-bottom:none;}
+  .helper-name{display:flex; gap:8px; align-items:center; font-size:13px;}
+  .dot{width:8px; height:8px; border-radius:50%; background:#3a4a6a;}
+  .dot.on{background:#39d98a; box-shadow:0 0 8px #39d98a;}
+
+  .reveal-row{display:flex; gap:8px; margin-top:10px;}
+  .answer-picker{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px;}
+  .answer-picker button{
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:12px; cursor:pointer; text-align:center;
+    padding:9px 8px; border-radius:9px; border:1px solid var(--line); background:#0e1626; color:var(--mist);
+  }
+  .answer-picker button.picked{background:linear-gradient(90deg,#f2c94c,#c99a1f); color:#221a05; border-color:#f2c94c;}
+
+  /* ================= DISPLAY ================= */
+  #display{display:none; min-height:100vh; position:relative; padding:26px; overflow:hidden;}
+  #display.show{display:flex;}
+  .mountain-bg{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(232,180,64,.18), transparent 60%),
+      linear-gradient(180deg, #0B1220 0%, #0d1a2e 55%, #0a1420 100%);
+  }
+  .stars{position:absolute; inset:0; z-index:0;
+    background-image: radial-gradient(1px 1px at 20% 30%, #ffffff55 50%, transparent),
+                       radial-gradient(1px 1px at 70% 15%, #ffffff44 50%, transparent),
+                       radial-gradient(2px 2px at 85% 60%, #ffffff33 50%, transparent),
+                       radial-gradient(1px 1px at 40% 70%, #ffffff44 50%, transparent),
+                       radial-gradient(1px 1px at 55% 40%, #ffffff33 50%, transparent);
+    opacity:.7;
+  }
+  .stage{position:relative; z-index:1; display:flex; width:100%; gap:24px;}
+  .ladder-wrap{
+    width:220px; flex-shrink:0; display:flex; flex-direction:column-reverse; gap:16px;
+    position:relative; padding:4px 0;
+  }
+  .ladder-wrap::before{
+    content:''; position:absolute; top:0; bottom:0; left:50%; width:4px; transform:translateX(-50%);
+    background:linear-gradient(to top, var(--teal), var(--gold)); border-radius:4px; opacity:.45;
+  }
+  .rung{
+    width:96px; border-radius:14px; padding:10px 6px; font-family:'Tajawal',sans-serif; font-weight:900;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--line);
+    background:#0e1626cc; color:#5f7396; position:relative; z-index:1;
+    transition:background .5s ease, border-color .5s ease, box-shadow .5s ease, transform .5s ease, color .5s ease;
+  }
+  .rung.side-l{align-self:flex-start;}
+  .rung.side-r{align-self:flex-end;}
+  .rung.side-l::after, .rung.side-r::after{
+    content:''; position:absolute; top:50%; height:3px; width:22px; background:#3a4a6a; opacity:.6; z-index:-1;
+  }
+  .rung.side-l::after{right:-22px;}
+  .rung.side-r::after{left:-22px;}
+  .rung.reached::after{background:var(--teal);}
+  .rung.current::after{background:var(--gold);}
+  .rung .val{font-size:19px;}
+  .rung .idx{font-size:10px; opacity:.6; font-weight:600;}
+  .rung.reached{background:linear-gradient(160deg,var(--teal),#134a41); color:#eafff9; border-color:var(--teal);}
+  .rung.current{
+    background:linear-gradient(160deg,var(--gold),#c98f2a); color:#221a05; border-color:var(--gold);
+    box-shadow:0 0 26px #e8b44088; transform:scale(1.18); z-index:2;
+  }
+  .rung .flag{position:absolute; top:-10px; font-size:16px;}
+  .rung.side-l .flag{right:-6px;} .rung.side-r .flag{left:-6px;}
+  .rung.trap-mark{box-shadow:inset 0 0 0 2px var(--crimson);}
+  .rung.peak .val::before{content:'👑 '; }
+
+  .main-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:22px; padding-top:6px;}
+  .teams-bar{display:flex; gap:16px; width:100%; justify-content:center;}
+  .team-pill{
+    background:#0e1626cc; border:1px solid var(--line); border-radius:16px; padding:10px 22px; text-align:center; min-width:180px;
+    transition:border-color .4s ease, box-shadow .4s ease, opacity .4s ease, filter .4s ease;
+  }
+  .team-pill .nm{font-family:'Tajawal',sans-serif; font-weight:700; font-size:15px; color:#cdd8ea;}
+  .team-pill .sc{font-family:'Tajawal',sans-serif; font-weight:900; font-size:26px; color:var(--gold);}
+  .team-pill.eliminated{opacity:.35; filter:grayscale(1);}
+
+  .timer-ring{
+    width:110px; height:110px; border-radius:50%; border:6px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-family:'Tajawal',sans-serif;
+    font-weight:900; font-size:34px; color:var(--gold); background:#0e1626cc; position:relative;
+  }
+  .timer-ring.low{border-color:var(--crimson); color:var(--crimson); animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.08);}}
+
+  .qcard{
+    width:min(880px,92%); background:linear-gradient(180deg,#152137,#0e1626); border:1px solid var(--line);
+    border-radius:22px; padding:28px 34px; text-align:center; box-shadow:0 20px 60px #00000055;
+  }
+  .qcard .rlabel{color:var(--gold-soft); font-size:13px; font-weight:700; letter-spacing:1px; margin-bottom:6px;}
+  .qcard .qtext{font-family:'Tajawal',sans-serif; font-weight:800; font-size:clamp(20px,3vw,32px); line-height:1.5;}
+
+  .team-badge{
+    display:flex; align-items:center; gap:14px; padding:12px 24px; border-radius:18px;
+    border:2px solid var(--line); background:#0e1626cc;
+  }
+  .team-badge.t0{border-color:#3aa0ff; box-shadow:0 0 24px #3aa0ff33;}
+  .team-badge.t1{border-color:var(--crimson); box-shadow:0 0 24px #b23a4833;}
+  .tb-avatar{font-size:30px;}
+  .tb-info{text-align:right;}
+  .tb-name{font-family:'Tajawal',sans-serif; font-weight:900; font-size:19px; color:var(--mist);}
+  .tb-level{font-size:13px; color:#9fb0c9; margin-top:2px;}
+  .tb-level b{color:var(--gold); font-family:'Tajawal',sans-serif; font-size:15px;}
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:14px; width:min(880px,92%);}
+  .opt{
+    background:#152137; border:1px solid var(--line); border-radius:14px; padding:16px 18px; font-family:'Tajawal',sans-serif;
+    font-weight:700; font-size:clamp(15px,1.6vw,19px); transition:.25s; text-align:center;
+  }
+  .opt.removed{opacity:0; transform:scale(.85); pointer-events:none; height:0; padding:0; margin:0; border:none;}
+  .opt.selected-flash{background:linear-gradient(90deg,#f2c94c,#c99a1f); border-color:#f2c94c; color:#221a05; box-shadow:0 0 20px #f2c94c66;}
+  .opt.correct-flash{background:linear-gradient(90deg,var(--teal),#134a41); border-color:#39d98a; color:#eafff9;}
+  .opt.wrong-flash{background:linear-gradient(90deg,var(--crimson),#7a2530); border-color:var(--crimson); color:#fff;}
+
+  .reveal-banner{
+    font-family:'Tajawal',sans-serif; font-weight:900; font-size:clamp(24px,3vw,40px); padding:16px 40px; border-radius:18px;
+  }
+  .reveal-banner.ok{background:#0f3d2f; color:#39d98a; border:2px solid #39d98a;}
+  .reveal-banner.no{background:#3d1418; color:#ff6b7a; border:2px solid var(--crimson);}
+
+  .helper-overlay{
+    position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+    background:rgba(6,10,20,.86); backdrop-filter:blur(4px);
+  }
+  .helper-overlay h2{font-family:'Tajawal',sans-serif; font-size:clamp(26px,4vw,46px); color:var(--gold); margin:0;}
+  .helper-icon{font-size:64px; animation:bounceIcon 1s ease-in-out infinite;}
+  .helper-icon.phone{animation:ringIcon .5s ease-in-out infinite;}
+  @keyframes bounceIcon{0%,100%{transform:translateY(0);} 50%{transform:translateY(-16px);}}
+  @keyframes ringIcon{0%,100%{transform:rotate(0deg);} 25%{transform:rotate(18deg);} 75%{transform:rotate(-18deg);}}
+  .bars{display:flex; gap:16px; align-items:flex-end; height:180px;}
+  .bar{width:60px; background:linear-gradient(180deg,var(--gold),#a5720f); border-radius:8px 8px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:6px; font-weight:800; font-family:'Tajawal',sans-serif; color:#221a05;}
+
+  .announce-toast{
+    position:absolute; top:18px; left:50%; transform:translateX(-50%); z-index:9;
+    background:linear-gradient(90deg,var(--gold),#c98f2a); color:#221a05; font-family:'Tajawal',sans-serif;
+    font-weight:900; font-size:clamp(16px,2.2vw,24px); padding:12px 28px; border-radius:16px;
+    box-shadow:0 10px 30px #00000055; animation:toastPop .35s ease;
+  }
+  @keyframes toastPop{ from{opacity:0; transform:translateX(-50%) translateY(-16px);} to{opacity:1; transform:translateX(-50%) translateY(0);} }
+
+  .trap-overlay{
+    position:absolute; inset:0; z-index:6; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:
+      repeating-linear-gradient(135deg, #ff2b3d15 0 26px, transparent 26px 52px),
+      radial-gradient(ellipse at center, #6b0f1a, #1a0509 75%);
+    animation:dangerPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes dangerPulse{
+    0%,100%{ box-shadow: inset 0 0 0px #ff2b3d00; }
+    50%{ box-shadow: inset 0 0 140px #ff2b3d55; }
+  }
+  .trap-overlay .danger-icon{font-size:clamp(50px,8vw,90px); animation:shakeIcon .35s ease-in-out infinite;}
+  @keyframes shakeIcon{0%,100%{transform:rotate(-6deg);} 50%{transform:rotate(6deg);}}
+  .trap-overlay h1{
+    font-family:'Tajawal',sans-serif; font-size:clamp(34px,6vw,64px); color:#ff6b7a; margin:0;
+    text-shadow:0 0 30px #ff2b3d; letter-spacing:1px;
+  }
+  .trap-overlay p{color:#ffb3ba; font-size:18px; font-weight:700;}
+  .trap-overlay .timer-ring.low{border-color:#ff2b3d; color:#ff2b3d; box-shadow:0 0 30px #ff2b3d88;}
+
+  .bigevent-overlay{
+    position:absolute; inset:0; z-index:8; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px;
+    animation:bigEventIn .4s ease;
+  }
+  @keyframes bigEventIn{ from{opacity:0; transform:scale(.9);} to{opacity:1; transform:scale(1);} }
+  .bigevent-overlay .be-icon{font-size:clamp(56px,9vw,100px);}
+  .bigevent-overlay h1{font-family:'Tajawal',sans-serif; font-size:clamp(30px,5vw,58px); margin:0; text-align:center;}
+  .bigevent-overlay p{font-size:18px; font-weight:700; text-align:center;}
+  .bigevent-overlay.survive{ background:radial-gradient(ellipse at center, #0f3d2f, #08120e 75%); }
+  .bigevent-overlay.survive h1{ color:#39d98a; text-shadow:0 0 30px #39d98a; }
+  .bigevent-overlay.survive p{ color:#9df5c8; }
+  .bigevent-overlay.fall{
+    background:repeating-linear-gradient(135deg, #ff2b3d15 0 26px, transparent 26px 52px), radial-gradient(ellipse at center, #6b0f1a, #1a0509 75%);
+  }
+  .bigevent-overlay.fall h1{ color:#ff6b7a; text-shadow:0 0 30px #ff2b3d; }
+  .bigevent-overlay.fall p{ color:#ffb3ba; }
+  .bigevent-overlay.withdraw{ background:radial-gradient(ellipse at center, #4a3a10, #0B1220 75%); }
+  .bigevent-overlay.withdraw h1{ color:var(--gold); text-shadow:0 0 30px #e8b44099; }
+  .bigevent-overlay.withdraw p{ color:var(--gold-soft); }
+
+  .endscreen{
+    position:absolute; inset:0; z-index:7; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:radial-gradient(ellipse at center, #4a3a10, #0B1220 70%);
+  }
+  .endscreen h1{font-family:'Tajawal',sans-serif; font-size:clamp(34px,6vw,70px); color:var(--gold); margin:0; text-shadow:0 0 40px #e8b44099;}
+  .confetti{position:absolute; top:-10px; width:8px; height:16px; opacity:.9; animation:fall linear infinite;}
+  @keyframes fall{ to { transform:translateY(110vh) rotate(400deg); } }
+
+  .empty-state{color:#8ea0bd; text-align:center; font-family:'Tajawal',sans-serif; font-size:22px;}
+  @media (max-width:820px){
+    .stage{flex-direction:column;}
+    .ladder-wrap{flex-direction:row; width:100%; overflow-x:auto; gap:8px;}
+    .ladder-wrap::before{display:none;}
+    .rung{align-self:auto !important;}
+    .rung.side-l::after, .rung.side-r::after{display:none;}
+    .options{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Mobile admin (phone as the presenter's own control panel) ---------- */
+  @media (max-width:640px){
+    #modeSwitch{
+      left:8px; right:8px; top:8px; width:auto;
+      flex-wrap:wrap; justify-content:space-between; gap:6px; padding:8px 10px;
+    }
+    #modeSwitch .gameTag{font-size:11px; order:1; flex-basis:100%; text-align:center;}
+    #modeSwitch .btns{order:2;}
+    #modeSwitch button.leave{order:3;}
+    #admin{padding:96px 10px 40px;}
+    .admin-title{font-size:21px;}
+    .admin-sub{font-size:12px; margin-bottom:16px;}
+    .grid{grid-template-columns:1fr; gap:12px;}
+    .card{padding:14px; border-radius:14px;}
+    .row{flex-direction:column; gap:10px;}
+    .qbank-item{flex-direction:column;}
+    .qbank-actions{align-self:flex-end;}
+    .round-grid{gap:5px;}
+    .round-btn{font-size:12px;}
+    .btnrow{flex-direction:column;}
+    .btnrow button.btn{width:100%;}
+    .reveal-row{flex-direction:column;}
+    .gate-card{padding:20px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>قمة وقاع</h1>
+  <p>أدخل رقم اللعبة. المقدّم يُنشئ رقم اللعبة ويدخل كمقدّم، وشاشة الجمهور تدخل بنفس الرقم لتتزامن معه تلقائياً.</p>
+  <div class="gate-card">
+    <label>رقم اللعبة</label>
+    <input type="text" id="gateGameId" placeholder="مثال: 1" inputmode="numeric">
+    <div id="gateStatus" style="min-height:18px; font-size:12px; margin-top:8px; font-weight:700;"></div>
+    <div id="gateError"></div>
+    <div class="gate-actions">
+      <button class="btn gold" id="gateAdminBtn">إنشاء / دخول كمقدّم</button>
+      <button class="btn teal" id="gateDisplayBtn">دخول كشاشة عرض للجمهور</button>
+    </div>
+  </div>
+</div>
+
+<div id="modeSwitch">
+  <span class="gameTag" id="gameTagLabel"></span>
+  <div class="btns">
+    <button id="btnAdmin" class="active">لوحة التحكم</button>
+    <button id="btnDisplay">شاشة العرض</button>
+  </div>
+  <button class="leave" id="btnLeaveGame">خروج</button>
+</div>
+
+<div id="trapSetupModal" style="display:none; position:fixed; inset:0; z-index:1000; background:rgba(6,10,20,.92); align-items:center; justify-content:center; padding:20px;">
+  <div class="gate-card" style="max-width:460px; width:95%;">
+    <h1 style="font-size:22px; margin-bottom:6px;">🕳️ حددي حفرتي كل فريق</h1>
+    <p style="text-align:center; color:#9fb0c9; font-size:13px; margin-bottom:14px;">قبل أول سؤال — اختاري رقمي الجولة (١-١٠) اللي فيها "حفرة" لكل فريق. تقدرين تعدّلينها لاحقاً من بطاقة "إدارة الحفر".</p>
+    <div id="trapSetupInputs"></div>
+    <div class="gate-actions">
+      <button class="btn gold" id="trapSetupGo">ابدأ اللعبة 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div id="admin">
+  <div class="admin-title">قمة وقاع — لوحة تحكم المقدم</div>
+  <div class="admin-sub">البيانات المشتركة (السؤال الحالي، النتيجة، المؤقتات) تُقرأ من كل من يفتح هذه الأداة — تأكد أن شاشة العرض على جهاز/بروجكتر منفصل ولا تتصفح فيه بيانات المقدم.</div>
+
+  <div class="grid">
+    <!-- Question Bank -->
+    <div class="card" style="grid-column:span 2;">
+      <h3><span class="ic">🗂️</span> بنك الأسئلة</h3>
+      <p style="font-size:12px;color:#9fb0c9;">كل سؤال له رقم خاص به بس (مو مرتبط بجولة أو فريق معيّن) — تقدرين تعرضين أي رقم سؤال في أي جولة ولأي فريق وقت اللعب.</p>
+      <div class="row">
+        <div><label>رقم السؤال</label><input type="number" id="qbNumber" min="1" value="1"></div>
+        <div><label>نوع السؤال</label>
+          <select id="qbHasOptions"><option value="yes">باختيارات</option><option value="no">بدون خيارات</option></select>
+        </div>
+      </div>
+      <label>نص السؤال</label>
+      <textarea id="qbText" placeholder="اكتب نص السؤال هنا"></textarea>
+      <div id="qbOptionsWrap">
+        <label>عدد الخيارات</label>
+        <select id="qbOptCount">
+          <option value="2">خياران</option>
+          <option value="3">3 خيارات</option>
+          <option value="4" selected>4 خيارات</option>
+        </select>
+        <div class="row"><div><label>خيار 1</label><input type="text" id="qbOpt0"></div><div><label>خيار 2</label><input type="text" id="qbOpt1"></div></div>
+        <div class="row"><div id="qbOpt2Wrap"><label>خيار 3</label><input type="text" id="qbOpt2"></div><div id="qbOpt3Wrap"><label>خيار 4</label><input type="text" id="qbOpt3"></div></div>
+        <label>رقم الخيار الصحيح</label><input type="number" id="qbCorrect" min="1" max="4" value="1">
+      </div>
+      <label>الإجابة الصحيحة (بدون خيارات)</label>
+      <input type="text" id="qbAnswerText" placeholder="نص الإجابة الصحيحة">
+      <div class="btnrow">
+        <button class="btn gold" id="qbSave">حفظ السؤال</button>
+        <button class="btn ghost" id="qbClear">تفريغ الحقول</button>
+      </div>
+      <div style="margin-top:16px; max-height:260px; overflow:auto;" id="qbList"></div>
+    </div>
+
+    <!-- Round picker + timer -->
+    <div class="card">
+      <h3><span class="ic">🎯</span> مُنتقي الأسئلة والمؤقت</h3>
+      <div id="nextLevelBadge" style="background:#0e1626; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13px; color:#cdd8ea; margin-bottom:12px;"></div>
+      <label>أدخلي رقم السؤال من البنك ليظهر فوراً للفريق الحالي على مستواه الحالي</label>
+      <div class="row">
+        <input type="number" id="bankNumberInput" min="1" placeholder="مثال: 4">
+        <button class="btn gold" id="bankNumberGo">إظهار فوراً</button>
+      </div>
+      <label style="margin-top:12px;">تعديل الجولة يدوياً (اختياري، تلقائي عادةً)</label>
+      <input type="number" id="currentRoundInput" min="1" max="10">
+
+      <div style="margin-top:18px; border-top:1px solid var(--line); padding-top:14px;">
+        <label>مدة السؤال (ثانية)</label>
+        <input type="number" id="timerDuration" value="30" min="5" step="5">
+        <div class="timer-display" id="timerReadout">00:30</div>
+        <div class="btnrow">
+          <button class="btn teal" id="timerStart">بدء</button>
+          <button class="btn" id="timerPause">إيقاف مؤقت</button>
+          <button class="btn crimson" id="timerReset">إعادة تعيين</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Helpers -->
+    <div class="card">
+      <h3><span class="ic">🛟</span> أدوات المساعدة</h3>
+      <div class="helper-row">
+        <div class="helper-name"><span class="dot" id="dotAudience"></span> تصويت الجمهور</div>
+        <button class="btn small" id="btnAudience">تفعيل (60ث)</button>
+      </div>
+      <div class="helper-row">
+        <div class="helper-name"><span class="dot" id="dotPhone"></span> اتصال بصديق</div>
+        <button class="btn small" id="btnPhone">تفعيل (60ث)</button>
+      </div>
+      <div class="helper-row">
+        <div class="helper-name"><span class="dot" id="dotRemove"></span> حذف خيارين</div>
+        <button class="btn small" id="btnRemove">تفعيل</button>
+      </div>
+    </div>
+
+    <!-- Trap management -->
+    <div class="card">
+      <h3><span class="ic">🕳️</span> إدارة الحفر</h3>
+      <div id="teamTrapConfig"></div>
+      <div class="warn" id="trapAlert" style="display:none;"></div>
+      <div id="trapActionsWrap"></div>
+    </div>
+
+    <!-- Teams & Score -->
+    <div class="card">
+      <h3><span class="ic">🏳️</span> الفرق والرصيد</h3>
+      <p style="font-size:12px;color:#9fb0c9;">التقدّم بمستوى واحد يصير تلقائياً عند إعلان "إجابة صحيحة". الأزرار هنا للاستثناءات فقط.</p>
+      <div id="teamsWrap"></div>
+      <div class="btnrow">
+        <button class="btn gold" id="btnBonusStep">🎁 خطوة إضافية (بونص)</button>
+        <button class="btn ghost" id="btnUndoStep">↩️ تراجع خطوة</button>
+        <button class="btn ghost" id="btnSwitchTeam">تبديل الفريق النشط</button>
+      </div>
+    </div>
+
+    <!-- Reveal -->
+    <div class="card">
+      <h3><span class="ic">📣</span> إعلان النتيجة</h3>
+      <p style="font-size:13px;color:#9fb0c9;">لن تظهر صح/خطأ على شاشة الجمهور إلا بعد الضغط هنا.</p>
+      <div id="answerPickerWrap" style="display:none;">
+        <label>إجابة الفريق (اضغط الخيار الذي اختاره ليظهر بالأصفر عند الجمهور)</label>
+        <div class="answer-picker" id="answerPicker"></div>
+      </div>
+      <div class="reveal-row">
+        <button class="btn teal" id="revealCorrect">إعلان: إجابة صحيحة ✅</button>
+        <button class="btn crimson" id="revealWrong">إعلان: إجابة خاطئة ❌</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn ghost" id="revealClear">إخفاء الإعلان / سؤال جديد</button>
+        <button class="btn gold" id="btnGameOver">إعلان الفوز النهائي 🏆</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DISPLAY ================= -->
+<div id="display">
+  <div class="mountain-bg"></div>
+  <div class="stars"></div>
+  <div class="stage" id="stage">
+    <div class="ladder-wrap" id="ladderWrap"></div>
+    <div class="main-col" id="mainCol">
+      <div class="empty-state">في انتظار المقدّم لبدء السؤال…</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ============================================================
+   FIREBASE (real-time sync across devices, works on GitHub Pages too)
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDdPGO7X52NRto2lxqlc2TIhtoyuoRLvZA",
+  authDomain: "jalees-wahhaj-ea971.firebaseapp.com",
+  databaseURL: "https://jalees-wahhaj-ea971-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "jalees-wahhaj-ea971",
+  storageBucket: "jalees-wahhaj-ea971.firebasestorage.app",
+  messagingSenderId: "155622422181",
+  appId: "1:155622422181:web:68b848bc87df6a60b33f4c"
+};
+let fbDb = null;
+let fbReady = false;
+try{
+  firebase.initializeApp(firebaseConfig);
+  fbDb = firebase.database();
+  fbReady = true;
+}catch(e){ console.error('Firebase init failed', e); fbReady = false; }
+
+/* ============================================================
+   STATE MODEL
+   ============================================================ */
+const SCORES = [50,100,150,200,250,300,350,400,450,500];
+
+function defaultState(){
+  return {
+    round: null,
+    question: null, // {text, options:[], hasOptions}
+    timer: {duration:30, endTs:null, running:false, remaining:30},
+    helpers: {
+      audience:{active:false, endTs:null},
+      phone:{active:false, endTs:null},
+      remove:{active:false}
+    },
+    trapEvent: {active:false, type:null, team:null, endTs:null}, // type: lastchance
+    reveal: {shown:false, correct:null},
+    selectedOption: null,
+    announcement: null, // {text, ts}
+    bigEvent: null, // {type:'survive'|'fall'|'withdraw', text, sub, ts}
+    teams: [
+      {name:'الفريق الأول', roundIndex:-1, eliminated:false, holes:[3,7]},
+      {name:'الفريق الثاني', roundIndex:-1, eliminated:false, holes:[4,8]}
+    ],
+    activeTeam: 0,
+    gameOver:false
+  };
+}
+
+let state = defaultState();
+let questionBank = {}; // {round: {0:{text,options,correctIndex,hasOptions,answerText}, 1:{...}}}
+let mode = 'admin';
+let helperTickHandle = null;
+let gameId = null;
+
+/* ============================================================
+   STORAGE HELPERS (scoped to the current game number, via Firebase)
+   ============================================================ */
+function stateRef(id){ return fbDb.ref('games/'+(id||gameId)+'/state'); }
+function bankRef(){ return fbDb.ref('question-bank'); }
+
+function normalizeState(s){
+  const d = defaultState();
+  if(!s) return d;
+  s.timer = Object.assign({}, d.timer, s.timer||{});
+  s.helpers = s.helpers||{};
+  s.helpers.audience = Object.assign({}, d.helpers.audience, s.helpers.audience||{});
+  s.helpers.phone = Object.assign({}, d.helpers.phone, s.helpers.phone||{});
+  s.helpers.remove = Object.assign({}, d.helpers.remove, s.helpers.remove||{});
+  s.trapEvent = Object.assign({}, d.trapEvent, s.trapEvent||{});
+  s.reveal = Object.assign({}, d.reveal, s.reveal||{});
+  if(!Array.isArray(s.teams) || s.teams.length!==2){ s.teams = d.teams; }
+  else { s.teams = s.teams.map((t,i)=>Object.assign({}, d.teams[i], t||{})); }
+  if(typeof s.activeTeam !== 'number') s.activeTeam = 0;
+  if(typeof s.selectedOption === 'undefined') s.selectedOption = null;
+  if(typeof s.gameOver !== 'boolean') s.gameOver = false;
+  if(typeof s.round === 'undefined') s.round = null;
+  if(typeof s.question === 'undefined') s.question = null;
+  if(typeof s.announcement === 'undefined') s.announcement = null;
+  if(typeof s.bigEvent === 'undefined') s.bigEvent = null;
+  return s;
+}
+function stripUndef(o){ return JSON.parse(JSON.stringify(o)); }
+
+async function saveState(){
+  if(!gameId || !fbReady) return;
+  try{ await stateRef().set(stripUndef(state)); }
+  catch(e){ console.error('save state failed', e); }
+}
+async function loadState(){
+  if(!gameId || !fbReady) return;
+  try{
+    const snap = await stateRef().once('value');
+    const val = snap.val();
+    if(val) state = normalizeState(val);
+  }catch(e){ console.error('load state failed', e); }
+}
+async function saveBank(){
+  if(!gameId || !fbReady) return;
+  try{ await bankRef().set(stripUndef(questionBank)); }
+  catch(e){ console.error('save bank failed', e); }
+}
+async function loadBank(){
+  if(!gameId || !fbReady) return;
+  try{
+    const snap = await bankRef().once('value');
+    questionBank = snap.val() || {};
+  }catch(e){ questionBank = {}; }
+}
+
+/* ============================================================
+   GAME GATE (create / join a numbered game)
+   ============================================================ */
+function normalizeGameId(v){
+  const t = (v||'').trim();
+  if(!t) return null;
+  // Firebase RTDB keys can't contain . # $ [ ] / or whitespace
+  const clean = t.replace(/[\s.#$\[\]\/]+/g,'').toLowerCase();
+  return clean || null;
+}
+async function sessionExists(id){
+  if(!fbReady) return 'unavailable';
+  try{
+    const snap = await stateRef(id).once('value');
+    return snap.exists();
+  }catch(e){ console.error('sessionExists check failed', e); return 'unavailable'; }
+}
+
+let gateCheckTimer = null;
+document.getElementById('gateGameId').addEventListener('input', ()=>{
+  const statusEl = document.getElementById('gateStatus');
+  const id = normalizeGameId(document.getElementById('gateGameId').value);
+  if(gateCheckTimer) clearTimeout(gateCheckTimer);
+  if(!id){ statusEl.textContent=''; return; }
+  statusEl.style.color = '#9fb0c9';
+  statusEl.textContent = 'جاري التحقق من رقم اللعبة…';
+  gateCheckTimer = setTimeout(async ()=>{
+    const exists = await sessionExists(id);
+    // make sure the field wasn't changed while we were checking
+    if(normalizeGameId(document.getElementById('gateGameId').value) !== id) return;
+    if(exists==='unavailable'){
+      statusEl.style.color = '#ff6b7a';
+      statusEl.textContent = '⚠️ لا يمكن الاتصال بخدمة المزامنة (Firebase) الآن — تأكدي من اتصال الإنترنت وحاولي مرة أخرى.';
+    } else if(exists){
+      statusEl.style.color = '#39d98a';
+      statusEl.textContent = '🟢 هذه الجلسة موجودة وتُلعب الآن — يمكنك الدخول كشاشة عرض لتتزامن معها.';
+    } else {
+      statusEl.style.color = '#9fb0c9';
+      statusEl.textContent = '⚪ لا توجد جلسة بهذا الرقم بعد — ستُنشأ عند الدخول كمقدّم.';
+    }
+  }, 450);
+});
+
+document.getElementById('gateAdminBtn').onclick = ()=>{
+  if(!fbReady){
+    document.getElementById('gateError').textContent = 'تعذّر الاتصال بخدمة المزامنة (Firebase). تأكدي من اتصال الإنترنت ثم أعيدي تحميل الصفحة.';
+    return;
+  }
+  enterGame('admin');
+};
+document.getElementById('gateDisplayBtn').onclick = async ()=>{
+  const id = normalizeGameId(document.getElementById('gateGameId').value);
+  if(!id){ document.getElementById('gateError').textContent='اكتب رقم لعبة صالح'; return; }
+  document.getElementById('gateError').textContent='';
+  const exists = await sessionExists(id);
+  if(exists==='unavailable'){
+    document.getElementById('gateError').textContent = 'تعذّر الاتصال بخدمة المزامنة (Firebase). تأكدي من اتصال الإنترنت ثم حاولي مرة أخرى.';
+    return;
+  }
+  if(!exists){
+    document.getElementById('gateError').textContent = 'لا توجد جلسة نشطة بهذا الرقم بعد. تأكد أن المقدّم دخل بنفس الرقم من جهازه أولاً.';
+    return;
+  }
+  enterGame('display');
+};
+document.getElementById('gateGameId').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') enterGame('admin');
+});
+document.getElementById('btnLeaveGame').onclick = ()=>{
+  detachRealtimeListener();
+  gameId = null;
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('modeSwitch').style.display='none';
+  document.getElementById('admin').classList.remove('show');
+  document.getElementById('display').classList.remove('show');
+  document.getElementById('gateGameId').value='';
+  document.getElementById('gateError').textContent='';
+  document.getElementById('gateStatus').textContent='';
+};
+let realtimeRef = null;
+function attachRealtimeListener(){
+  detachRealtimeListener();
+  if(!fbReady || !gameId) return;
+  realtimeRef = stateRef();
+  realtimeRef.on('value', (snap)=>{
+    const val = snap.val();
+    if(val){
+      state = normalizeState(val);
+      if(mode==='display') renderDisplay();
+    }
+  });
+}
+function detachRealtimeListener(){
+  if(realtimeRef){ realtimeRef.off(); realtimeRef = null; }
+}
+async function enterGame(targetMode){
+  const id = normalizeGameId(document.getElementById('gateGameId').value);
+  if(!id){ document.getElementById('gateError').textContent='اكتب رقم لعبة صالح'; return; }
+  document.getElementById('gateError').textContent='';
+  gameId = id;
+  const hadExisting = await sessionExists(id);
+  state = defaultState();
+  questionBank = {};
+  await loadBank();
+  await loadState();
+  document.getElementById('gate').style.display='none';
+  document.getElementById('modeSwitch').style.display='flex';
+  document.getElementById('gameTagLabel').textContent = 'لعبة رقم '+id;
+  attachRealtimeListener();
+  if(targetMode==='admin'){
+    await saveState(); // make sure the session exists in Firebase right away, even before any action
+    document.getElementById('qbClear').onclick();
+    if(hadExisting!==true){
+      showTrapSetupModal();
+      return;
+    }
+  }
+  setMode(targetMode);
+}
+
+function showTrapSetupModal(){
+  const wrap = document.getElementById('trapSetupInputs');
+  wrap.innerHTML='';
+  state.teams.forEach((t,ti)=>{
+    const div = document.createElement('div');
+    div.style.marginBottom='12px';
+    div.innerHTML = `<label>حفرتا ${escapeHtml(t.name)}</label>
+      <div class="row">
+        <input type="number" min="1" max="10" value="${t.holes[0]}" data-tsteam="${ti}" data-tshole="0">
+        <input type="number" min="1" max="10" value="${t.holes[1]}" data-tsteam="${ti}" data-tshole="1">
+      </div>`;
+    wrap.appendChild(div);
+  });
+  document.getElementById('trapSetupModal').style.display='flex';
+}
+document.getElementById('trapSetupGo').onclick = async ()=>{
+  document.querySelectorAll('#trapSetupInputs input').forEach(inp=>{
+    const ti = parseInt(inp.dataset.tsteam), hi = parseInt(inp.dataset.tshole);
+    state.teams[ti].holes[hi] = parseInt(inp.value)||1;
+  });
+  document.getElementById('trapSetupModal').style.display='none';
+  await saveState();
+  setMode('admin');
+};
+
+/* ============================================================
+   MODE SWITCH
+   ============================================================ */
+document.getElementById('btnAdmin').onclick = ()=> setMode('admin');
+document.getElementById('btnDisplay').onclick = ()=> setMode('display');
+function setMode(m){
+  mode = m;
+  document.getElementById('admin').classList.toggle('show', m==='admin');
+  document.getElementById('display').classList.toggle('show', m==='display');
+  document.getElementById('btnAdmin').classList.toggle('active', m==='admin');
+  document.getElementById('btnDisplay').classList.toggle('active', m==='display');
+  if(m==='admin') renderAdmin();
+  else renderDisplay();
+}
+
+/* ============================================================
+   QUESTION BANK UI
+   ============================================================ */
+document.getElementById('qbHasOptions').addEventListener('change', (e)=>{
+  document.getElementById('qbOptionsWrap').style.display = e.target.value==='yes' ? 'block':'none';
+  document.getElementById('qbAnswerText').style.display = e.target.value==='yes' ? 'none':'block';
+});
+document.getElementById('qbAnswerText').style.display = 'none';
+
+function applyOptCount(count){
+  document.getElementById('qbOpt2Wrap').style.display = count>=3 ? 'block':'none';
+  document.getElementById('qbOpt3Wrap').style.display = count>=4 ? 'block':'none';
+  document.getElementById('qbCorrect').max = count;
+  const cur = parseInt(document.getElementById('qbCorrect').value)||1;
+  if(cur>count) document.getElementById('qbCorrect').value = count;
+}
+document.getElementById('qbOptCount').addEventListener('change', (e)=>{
+  applyOptCount(parseInt(e.target.value));
+});
+applyOptCount(4);
+
+document.getElementById('qbClear').onclick = ()=>{
+  ['qbText','qbOpt0','qbOpt1','qbOpt2','qbOpt3','qbAnswerText'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('qbCorrect').value=1;
+  document.getElementById('qbOptCount').value='4';
+  applyOptCount(4);
+  const nums = Object.keys(questionBank).map(n=>parseInt(n)).filter(n=>!isNaN(n));
+  document.getElementById('qbNumber').value = nums.length ? Math.max(...nums)+1 : 1;
+};
+
+document.getElementById('qbSave').onclick = async ()=>{
+  if(!gameId || !fbReady){ alert('لازم تدخلين كمقدّم أولاً (من شاشة رقم اللعبة) قبل حفظ الأسئلة، وإلا ما بتنحفظ.'); return; }
+  const num = parseInt(document.getElementById('qbNumber').value);
+  if(!num || num<1){ alert('اكتبي رقم سؤال صحيح (١ فأكثر)'); return; }
+  const hasOptions = document.getElementById('qbHasOptions').value === 'yes';
+  const text = document.getElementById('qbText').value.trim();
+  if(!text){ alert('اكتب نص السؤال'); return; }
+  let q = {text, hasOptions};
+  if(hasOptions){
+    const count = parseInt(document.getElementById('qbOptCount').value);
+    const opts = [];
+    for(let i=0;i<count;i++) opts.push(document.getElementById('qbOpt'+i).value.trim());
+    if(opts.some(o=>!o)){ alert('املأ كل الخيارات ('+count+')'); return; }
+    q.options = opts;
+    q.correctIndex = parseInt(document.getElementById('qbCorrect').value)-1;
+  } else {
+    const ans = document.getElementById('qbAnswerText').value.trim();
+    if(!ans){ alert('اكتب الإجابة الصحيحة'); return; }
+    q.answerText = ans;
+  }
+  questionBank[num] = q;
+  await saveBank();
+  renderQBList();
+  document.getElementById('qbClear').onclick();
+};
+
+const TEAM_LABELS = ['الفريق الأول','الفريق الثاني'];
+
+function renderQBList(){
+  const wrap = document.getElementById('qbList');
+  wrap.innerHTML='';
+  Object.keys(questionBank).sort((a,b)=>a-b).forEach(num=>{
+    const q = questionBank[num];
+    if(!q) return;
+    const div = document.createElement('div');
+    div.className='qbank-item';
+    div.innerHTML = `
+      <div>
+        <div><b>سؤال #${num}</b> — ${escapeHtml(q.text)}</div>
+        <div class="meta">${q.hasOptions ? 'خيارات: '+q.options.map(escapeHtml).join(' / ')+' — الصحيح: '+(q.correctIndex+1) : 'إجابة: '+escapeHtml(q.answerText)}</div>
+      </div>
+      <div class="qbank-actions">
+        <button class="btn small" data-edit="${num}">تعديل</button>
+        <button class="btn small crimson" data-del="${num}">حذف</button>
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    delete questionBank[b.dataset.del];
+    await saveBank(); renderQBList();
+  });
+  wrap.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+    const num = b.dataset.edit;
+    const q = questionBank[num];
+    document.getElementById('qbNumber').value = num;
+    document.getElementById('qbHasOptions').value = q.hasOptions ? 'yes':'no';
+    document.getElementById('qbHasOptions').dispatchEvent(new Event('change'));
+    document.getElementById('qbText').value = q.text;
+    if(q.hasOptions){
+      document.getElementById('qbOptCount').value = String(q.options.length);
+      applyOptCount(q.options.length);
+      ['qbOpt0','qbOpt1','qbOpt2','qbOpt3'].forEach(id=>document.getElementById(id).value='');
+      q.options.forEach((o,i)=>document.getElementById('qbOpt'+i).value=o);
+      document.getElementById('qbCorrect').value = q.correctIndex+1;
+    } else {
+      document.getElementById('qbAnswerText').value = q.answerText;
+    }
+  });
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   ROUND PICKER
+   ============================================================ */
+// The round/level for the active team's NEXT question is derived automatically
+// from their progress on the ladder (roundIndex -1..9 -> next round 1..10),
+// so the admin doesn't need to manually pick a round each turn.
+function suggestedRound(){
+  const at = state.teams[state.activeTeam];
+  return Math.min(10, at.roundIndex+2);
+}
+function renderNextLevelBadge(){
+  const at = state.teams[state.activeTeam];
+  const r = state.question ? state.round : suggestedRound();
+  document.getElementById('nextLevelBadge').innerHTML =
+    `دور <b>${escapeHtml(at.name)}</b> — الجولة <b>${r}</b> (${SCORES[r-1]} نقطة)`;
+  if(!state.question) document.getElementById('currentRoundInput').value = r;
+}
+document.getElementById('currentRoundInput').addEventListener('input', checkTrapAlert);
+
+document.getElementById('bankNumberGo').onclick = ()=> showQuestionByBankNumber();
+document.getElementById('bankNumberInput').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){ showQuestionByBankNumber(); }
+});
+async function showQuestionByBankNumber(){
+  trapBypassed = false;
+  const bankNum = parseInt(document.getElementById('bankNumberInput').value);
+  if(!bankNum){ alert('اكتبي رقم سؤال من البنك'); return; }
+  const q = questionBank[bankNum];
+  if(!q){ alert('لا يوجد سؤال بهذا الرقم في البنك'); return; }
+  const r = parseInt(document.getElementById('currentRoundInput').value) || suggestedRound();
+  if(r<1 || r>10){ alert('رقم الجولة غير صالح (١-١٠)'); return; }
+  state.round = r;
+  const team = state.activeTeam;
+  state.question = {text:q.text, hasOptions:q.hasOptions, options: q.hasOptions? q.options: null, correctIndex: q.hasOptions? q.correctIndex: null, removed:[], team:team, bankNumber:bankNum};
+  state.reveal = {shown:false, correct:null};
+  state.selectedOption = null;
+  state.helpers = {audience:{active:false,endTs:null}, phone:{active:false,endTs:null}, remove:{active:false}};
+  resetTimerObj();
+  document.getElementById('bankNumberInput').value='';
+  await saveState();
+  renderAdmin();
+}
+
+let trapBypassed = false;
+function checkTrapAlert(){
+  const alertEl = document.getElementById('trapAlert');
+  const actionsEl = document.getElementById('trapActionsWrap');
+  const at = state.teams[state.activeTeam];
+  const r = state.question
+    ? suggestedRound()  // reflects any auto/bonus step that just happened, even while this question's card is still showing
+    : (parseInt(document.getElementById('currentRoundInput').value) || suggestedRound());
+
+  // A last-chance challenge is currently running -> show survive/fall resolution
+  if(state.trapEvent && state.trapEvent.active && state.trapEvent.type==='lastchance'){
+    alertEl.style.display='none';
+    actionsEl.innerHTML = `<div class="resolve-panel">
+        <p>⏳ تحدي النجاة قائم الآن — هل نجا الفريق من الحفرة؟</p>
+        <div class="btnrow">
+          <button class="btn teal" id="btnTrapSurvive">✅ نجا من الحفرة</button>
+          <button class="btn crimson" id="btnTrapFail">❌ سقط في الحفرة</button>
+        </div>
+      </div>`;
+    document.getElementById('btnTrapSurvive').onclick = ()=>resolveTrap(true);
+    document.getElementById('btnTrapFail').onclick = ()=>resolveTrap(false);
+    return;
+  }
+
+  const onHole = at && r && at.holes.includes(r) && !at.eliminated && !trapBypassed;
+  if(onHole){
+    alertEl.className='trap-alert-box';
+    alertEl.style.display='block';
+    alertEl.textContent = '⚠️ تنبيه: '+at.name+' وصل إلى جولة الحفرة رقم '+r;
+    actionsEl.innerHTML = `<div class="btnrow">
+        <button class="btn crimson" id="btnTrapChallenge">🎯 تفعيل تحدي النجاة</button>
+        <button class="btn ghost" id="btnTrapBypass">➡️ تجاوز (يكمل بأمان)</button>
+      </div>`;
+    document.getElementById('btnTrapChallenge').onclick = activateLastChance;
+    document.getElementById('btnTrapBypass').onclick = ()=>{ trapBypassed=true; renderAdmin(); };
+  } else {
+    alertEl.style.display='none';
+    actionsEl.innerHTML='';
+  }
+}
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+function resetTimerObj(){
+  const dur = parseInt(document.getElementById('timerDuration').value)||30;
+  state.timer = {duration:dur, endTs:null, running:false, remaining:dur};
+}
+document.getElementById('timerStart').onclick = async ()=>{
+  const dur = parseInt(document.getElementById('timerDuration').value)||30;
+  if(!state.timer.running){
+    const remain = state.timer.remaining ?? dur;
+    state.timer.duration = dur;
+    state.timer.endTs = Date.now() + remain*1000;
+    state.timer.running = true;
+    await saveState();
+  }
+};
+document.getElementById('timerPause').onclick = async ()=>{
+  if(state.timer.running){
+    state.timer.remaining = Math.max(0, Math.round((state.timer.endTs - Date.now())/1000));
+    state.timer.running = false;
+    await saveState();
+  }
+};
+document.getElementById('timerReset').onclick = async ()=>{
+  resetTimerObj();
+  await saveState();
+  renderAdmin();
+};
+
+function computeRemaining(t){
+  if(!t) return 0;
+  if(t.running && t.endTs) return Math.max(0, Math.round((t.endTs - Date.now())/1000));
+  return t.remaining ?? t.duration;
+}
+// For simple {active, endTs} timers (audience vote, phone-a-friend, trap events)
+function computeHelperRemaining(t){
+  if(!t || !t.endTs) return 0;
+  return Math.max(0, Math.round((t.endTs - Date.now())/1000));
+}
+function fmtTime(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+document.getElementById('btnAudience').onclick = async ()=>{
+  state.helpers.audience = {active:true, endTs:Date.now()+60000};
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnPhone').onclick = async ()=>{
+  state.helpers.phone = {active:true, endTs:Date.now()+60000};
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnRemove').onclick = async ()=>{
+  if(!state.question || !state.question.hasOptions){ alert('لا يوجد سؤال بخيارات معروض حالياً'); return; }
+  const total = state.question.options.length;
+  const removeCount = Math.max(0, total-2);
+  if(removeCount<=0){ alert('هذا السؤال فيه خياران فقط، لا يوجد ما يُحذف'); return; }
+  const correct = state.question.correctIndex ?? 0;
+  const wrongIdx = Array.from({length:total},(_,i)=>i).filter(i=>i!==correct);
+  const toRemove = wrongIdx.sort(()=>Math.random()-0.5).slice(0,removeCount);
+  state.question.removed = toRemove;
+  state.helpers.remove = {active:true};
+  await saveState(); renderAdmin();
+};
+
+/* ============================================================
+   TRAP MANAGEMENT
+   ============================================================ */
+function renderTrapConfig(){
+  const wrap = document.getElementById('teamTrapConfig');
+  wrap.innerHTML='';
+  state.teams.forEach((t,ti)=>{
+    const div = document.createElement('div');
+    div.style.marginBottom='10px';
+    div.innerHTML = `<label>حفرتا ${escapeHtml(t.name)} (رقمي جولة من 1-10)</label>
+      <div class="row">
+        <input type="number" min="1" max="10" value="${t.holes[0]}" data-team="${ti}" data-hole="0">
+        <input type="number" min="1" max="10" value="${t.holes[1]}" data-team="${ti}" data-hole="1">
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('input').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const ti = parseInt(inp.dataset.team), hi = parseInt(inp.dataset.hole);
+      state.teams[ti].holes[hi] = parseInt(inp.value)||1;
+      await saveState(); renderNextLevelBadge(); checkTrapAlert();
+    };
+  });
+}
+async function activateLastChance(){
+  const at = state.activeTeam;
+  state.trapEvent = {active:true, type:'lastchance', team:at, endTs:Date.now()+15000};
+  await saveState(); renderAdmin();
+}
+async function resolveTrap(survived){
+  const at = state.trapEvent.team;
+  const teamName = state.teams[at].name;
+  if(survived){
+    const score = state.teams[at].roundIndex>=0 ? SCORES[state.teams[at].roundIndex] : 0;
+    state.bigEvent = {type:'survive', text:'نجا من الحفرة ولم يسقط بها! 🎉', sub: teamName+' يواصل بأمان برصيد '+score, ts:Date.now()};
+  } else {
+    state.teams[at].roundIndex = -1;
+    state.bigEvent = {type:'fall', text:'سقط في الحفرة! 💥', sub: teamName+' عاد رصيده للصفر', ts:Date.now()};
+  }
+  state.trapEvent = {active:false, type:null, team:null, endTs:null};
+  trapBypassed = true;
+  await saveState(); renderAdmin();
+}
+
+/* ============================================================
+   TEAMS / SCORE
+   ============================================================ */
+function renderTeams(){
+  const wrap = document.getElementById('teamsWrap');
+  wrap.innerHTML='';
+  state.teams.forEach((t,ti)=>{
+    const score = t.roundIndex>=0 ? SCORES[t.roundIndex] : 0;
+    const div = document.createElement('div');
+    div.className='team-box';
+    div.innerHTML = `
+      <div class="th">
+        <input type="text" value="${escapeHtml(t.name)}" data-name="${ti}">
+        <span class="score-tag">${score}</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; font-size:12px; color:#9fb0c9; flex-wrap:wrap;">
+        <label style="margin:0;"><input type="checkbox" ${ti===state.activeTeam?'checked':''} data-active="${ti}"> نشط الآن</label>
+        <label style="margin:0;"><input type="checkbox" ${t.eliminated?'checked':''} data-elim="${ti}"> خرج من المسابقة</label>
+      </div>
+      <div class="btnrow">
+        <button class="btn small withdraw-btn" data-withdraw="${ti}" ${(t.eliminated||state.question)?'disabled':''}>🏳️ انسحاب بالرصيد الحالي</button>
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('[data-name]').forEach(inp=>inp.onchange=async()=>{
+    state.teams[inp.dataset.name].name = inp.value; await saveState(); renderAdmin();
+  });
+  wrap.querySelectorAll('[data-active]').forEach(inp=>inp.onchange=async()=>{
+    state.activeTeam = parseInt(inp.dataset.active); await saveState(); renderAdmin();
+  });
+  wrap.querySelectorAll('[data-elim]').forEach(inp=>inp.onchange=async()=>{
+    state.teams[inp.dataset.elim].eliminated = inp.checked; await saveState(); renderAdmin();
+  });
+  wrap.querySelectorAll('[data-withdraw]').forEach(btn=>btn.onclick=async()=>{
+    const ti = parseInt(btn.dataset.withdraw);
+    const t = state.teams[ti];
+    if(!confirm(t.name+' بيخرج من المسابقة بالرصيد الحالي، متأكدة؟')) return;
+    const score = t.roundIndex>=0 ? SCORES[t.roundIndex] : 0;
+    t.eliminated = true;
+    state.bigEvent = {type:'withdraw', text:'انسحب من المسابقة 🏳️', sub: t.name+' خرج بالرصيد '+score+' نقطة', ts:Date.now()};
+    const other = ti===0?1:0;
+    if(!state.teams[other].eliminated) state.activeTeam = other;
+    await saveState(); renderAdmin();
+  });
+}
+document.getElementById('btnSwitchTeam').onclick = async ()=>{
+  state.activeTeam = state.activeTeam===0?1:0; await saveState(); renderAdmin();
+};
+document.getElementById('btnBonusStep').onclick = ()=>advance(1, true);
+document.getElementById('btnUndoStep').onclick = ()=>advance(-1, false);
+async function advance(steps, isBonus){
+  const t = state.teams[state.activeTeam];
+  t.roundIndex = Math.max(-1, Math.min(9, t.roundIndex + steps));
+  const newScore = t.roundIndex>=0 ? SCORES[t.roundIndex] : 0;
+  if(steps>0){
+    state.announcement = {text: (isBonus?'🎁 خطوة إضافية! ':'⬆️ ')+t.name+' يتقدّم — الرصيد الآن '+newScore, ts: Date.now()};
+  } else {
+    state.announcement = {text: '↩️ تراجع خطوة لـ '+t.name+' — الرصيد الآن '+newScore, ts: Date.now()};
+  }
+  await saveState(); renderAdmin();
+}
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+document.getElementById('revealCorrect').onclick = async ()=>{
+  state.reveal = {shown:true, correct:true};
+  const t = state.teams[state.activeTeam];
+  t.roundIndex = Math.min(9, t.roundIndex+1);
+  const newScore = t.roundIndex>=0 ? SCORES[t.roundIndex] : 0;
+  state.announcement = {text: '✅ إجابة صحيحة! '+t.name+' — الرصيد الآن '+newScore, ts: Date.now()};
+  await saveState(); renderAdmin();
+};
+document.getElementById('revealWrong').onclick = async ()=>{
+  state.reveal = {shown:true, correct:false}; await saveState(); renderAdmin();
+};
+function pickNextActiveTeam(){
+  const cur = state.activeTeam;
+  const other = cur===0?1:0;
+  const curElim = state.teams[cur].eliminated;
+  const otherElim = state.teams[other].eliminated;
+  if(curElim && !otherElim) return other;   // current team is out -> continue with the survivor
+  if(!curElim && otherElim) return cur;     // other team is out -> stay on current (survivor)
+  if(curElim && otherElim) return cur;      // edge case: both out, no-op
+  return other;                              // normal case: alternate turns
+}
+document.getElementById('revealClear').onclick = async ()=>{
+  state.activeTeam = pickNextActiveTeam();
+  trapBypassed = false;
+  state.reveal = {shown:false, correct:null}; state.question=null; state.round=null; state.selectedOption=null;
+  await saveState(); renderAdmin();
+};
+document.getElementById('btnGameOver').onclick = async ()=>{
+  state.gameOver = true; await saveState(); renderAdmin();
+};
+
+/* ============================================================
+   ADMIN RENDER
+   ============================================================ */
+function renderAdmin(){
+  renderQBList();
+  renderNextLevelBadge();
+  renderTrapConfig();
+  renderTeams();
+  renderAnswerPicker();
+  checkTrapAlert();
+  document.getElementById('timerDuration').value = state.timer.duration;
+  document.getElementById('timerReadout').textContent = fmtTime(computeRemaining(state.timer));
+  document.getElementById('dotAudience').classList.toggle('on', !!state.helpers.audience.active && computeHelperRemaining(state.helpers.audience)>0);
+  document.getElementById('dotPhone').classList.toggle('on', !!state.helpers.phone.active && computeHelperRemaining(state.helpers.phone)>0);
+  document.getElementById('dotRemove').classList.toggle('on', !!state.helpers.remove.active);
+}
+
+function renderAnswerPicker(){
+  const wrap = document.getElementById('answerPickerWrap');
+  const box = document.getElementById('answerPicker');
+  if(!state.question || !state.question.hasOptions){
+    wrap.style.display='none';
+    return;
+  }
+  wrap.style.display='block';
+  box.innerHTML='';
+  state.question.options.forEach((opt,i)=>{
+    if((state.question.removed||[]).includes(i)) return;
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.className = state.selectedOption===i ? 'picked':'';
+    btn.disabled = !!state.reveal.shown;
+    btn.onclick = async ()=>{
+      state.selectedOption = i;
+      await saveState(); renderAdmin();
+    };
+    box.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   DISPLAY RENDER
+   ============================================================ */
+function renderDisplay(){
+  renderDisplayInner();
+  renderAnnounceToast();
+  renderBigEvent();
+}
+function renderAnnounceToast(){
+  const stage = document.getElementById('stage');
+  if(!stage) return;
+  let toastEl = document.getElementById('announceToast');
+  if(toastEl) toastEl.remove();
+  if(state.announcement && (Date.now()-state.announcement.ts) < 3500){
+    const t = document.createElement('div');
+    t.id='announceToast'; t.className='announce-toast';
+    t.textContent = state.announcement.text;
+    stage.appendChild(t);
+  }
+}
+function renderBigEvent(){
+  const stage = document.getElementById('stage');
+  if(!stage) return;
+  let el = document.getElementById('bigEventOverlay');
+  if(el) el.remove();
+  if(state.bigEvent && (Date.now()-state.bigEvent.ts) < 4500){
+    const icons = {survive:'✅', fall:'💥', withdraw:'🏳️'};
+    const div = document.createElement('div');
+    div.id='bigEventOverlay';
+    div.className = 'bigevent-overlay '+state.bigEvent.type;
+    div.innerHTML = `<div class="be-icon">${icons[state.bigEvent.type]||'⚡'}</div><h1>${escapeHtml(state.bigEvent.text)}</h1><p>${escapeHtml(state.bigEvent.sub||'')}</p>`;
+    stage.appendChild(div);
+  }
+}
+function renderDisplayInner(){
+  const mainCol = document.getElementById('mainCol');
+  const ladderWrap = document.getElementById('ladderWrap');
+
+  // Game over screen
+  if(state.gameOver){
+    mainCol.innerHTML = '';
+    ladderWrap.innerHTML = '';
+    const winners = state.teams.filter(t=>!t.eliminated).map(t=>t.name).join(' و ');
+    document.getElementById('stage').innerHTML = `
+      <div class="endscreen" id="endscreen">
+        <h1>🏆 مبروك ${escapeHtml(winners||'')} 🏆</h1>
+        <div style="font-family:'Tajawal',sans-serif; font-size:22px; color:var(--gold-soft);">تم الوصول إلى القمة — 500</div>
+      </div>`;
+    spawnConfetti();
+    return;
+  } else {
+    // rebuild base stage structure if it was replaced by endscreen previously
+    if(!document.getElementById('ladderWrap')){
+      document.getElementById('stage').innerHTML = `<div class="ladder-wrap" id="ladderWrap"></div><div class="main-col" id="mainCol"></div>`;
+    }
+  }
+
+  // ladder — vertical mountain trail, alternating left/right, score-only (no "round" wording)
+  const lw = document.getElementById('ladderWrap');
+  lw.innerHTML='';
+  for(let r=1;r<=10;r++){
+    const div = document.createElement('div');
+    let cls='rung '+(r%2===1?'side-l':'side-r');
+    const isCurrent = state.round===r;
+    const anyoneReached = state.teams.some(t=>t.roundIndex+1>=r);
+    if(isCurrent) cls+=' current'; else if(anyoneReached) cls+=' reached';
+    if(state.teams.some(t=>t.holes.includes(r))) cls+=' trap-mark';
+    if(r===10) cls+=' peak';
+    div.className=cls;
+    let flags='';
+    state.teams.forEach((t,ti)=>{ if(t.roundIndex+1===r) flags += ti===0?'🔵':'🔴'; });
+    div.innerHTML = `<span class="val">${SCORES[r-1]}</span><span class="idx">${r}</span>${flags?'<span class="flag">'+flags+'</span>':''}`;
+    lw.appendChild(div);
+  }
+
+  const mc = document.getElementById('mainCol');
+
+  // trap overlay (challenge running or time's up, awaiting admin's survive/fall decision)
+  if(state.trapEvent && state.trapEvent.active && state.trapEvent.type==='lastchance'){
+    const remain = computeHelperRemaining(state.trapEvent);
+    const teamName = state.teams[state.trapEvent.team]?.name || '';
+    const sub = remain>0 ? (escapeHtml(teamName)+' وقع في الحفرة!') : 'الوقت انتهى — بانتظار قرار المقدّم...';
+    mc.innerHTML = `<div class="trap-overlay"><div class="danger-icon">⚠️</div><h1>تحدي النجاة</h1><p>${sub}</p>
+      <div class="timer-ring ${remain<=5?'low':''}">${remain}</div></div>`;
+    return;
+  }
+
+  // teams bar + timer + question
+  let html = '<div class="teams-bar">';
+  state.teams.forEach((t,ti)=>{
+    const score = t.roundIndex>=0?SCORES[t.roundIndex]:0;
+    const playing = state.question && state.question.team===ti;
+    html += `<div class="team-pill ${t.eliminated?'eliminated':''}" style="${playing?'border-color:'+(ti===0?'#3aa0ff':'var(--crimson)')+'; box-shadow:0 0 18px '+(ti===0?'#3aa0ff55':'#b23a4855')+';':''}"><div class="nm">${escapeHtml(t.name)}</div><div class="sc">${score}</div></div>`;
+  });
+  html += '</div>';
+
+  if(!state.question){
+    mc.innerHTML = html + '<div class="empty-state">في انتظار المقدّم لبدء السؤال…</div>';
+    return;
+  }
+
+  const playingTeam = state.teams[state.question.team];
+  const currentScore = playingTeam.roundIndex>=0 ? SCORES[playingTeam.roundIndex] : 0;
+  html += `<div class="team-badge t${state.question.team}">
+      <div class="tb-avatar">${state.question.team===0?'🔵':'🔴'}</div>
+      <div class="tb-info">
+        <div class="tb-name">دور ${escapeHtml(playingTeam.name)}</div>
+        <div class="tb-level">رصيدهم الحالي <b>${currentScore}</b> — يلعبون الآن على مستوى <b>${SCORES[state.round-1]}</b></div>
+      </div>
+    </div>`;
+
+  const tRemain = computeRemaining(state.timer);
+  html += `<div class="timer-ring ${tRemain<=5?'low':''}">${tRemain}</div>`;
+  html += `<div class="qcard"><div class="qtext">${escapeHtml(state.question.text)}</div></div>`;
+
+  if(state.question.hasOptions){
+    html += '<div class="options">';
+    const correctIdx = state.question.correctIndex;
+    state.question.options.forEach((opt,i)=>{
+      const removed = (state.question.removed||[]).includes(i);
+      let cls='opt'+(removed?' removed':'');
+      if(state.reveal.shown){
+        if(i===correctIdx) cls+=' correct-flash';
+        else if(state.selectedOption===i && state.reveal.correct===false) cls+=' wrong-flash';
+      } else if(state.selectedOption===i){
+        cls+=' selected-flash';
+      }
+      html += `<div class="${cls}">${escapeHtml(opt)}</div>`;
+    });
+    html += '</div>';
+  }
+
+  if(state.reveal.shown){
+    html += `<div class="reveal-banner ${state.reveal.correct?'ok':'no'}">${state.reveal.correct?'إجابة صحيحة ✅':'إجابة خاطئة ❌'}</div>`;
+  }
+
+  mc.innerHTML = html;
+
+  // helper overlays layered on top (audience poll / phone a friend)
+  const stage = document.getElementById('stage');
+  let overlayEl = document.getElementById('helperOverlay');
+  if(overlayEl) overlayEl.remove();
+  if(state.helpers.audience.active && computeHelperRemaining(state.helpers.audience)>0){
+    const remain = computeHelperRemaining(state.helpers.audience);
+    const bars = (state.question.options||[]).map((o,i)=>{
+      const h = 40+Math.floor(Math.random()*140);
+      return `<div class="bar" style="height:${h}px;">${Math.floor((h/180)*100)}%</div>`;
+    }).join('');
+    const div = document.createElement('div');
+    div.id='helperOverlay'; div.className='helper-overlay';
+    div.innerHTML = `<div class="helper-icon">🙋‍♂️🙋‍♀️</div><h2>تصويت الجمهور — ${remain} ث</h2><div class="bars">${bars}</div>`;
+    stage.appendChild(div);
+  } else if(state.helpers.phone.active && computeHelperRemaining(state.helpers.phone)>0){
+    const remain = computeHelperRemaining(state.helpers.phone);
+    const div = document.createElement('div');
+    div.id='helperOverlay'; div.className='helper-overlay';
+    div.innerHTML = `<div class="helper-icon phone">📞</div><h2>اتصال بصديق — ${remain} ث</h2><div class="timer-ring">${remain}</div>`;
+    stage.appendChild(div);
+  }
+}
+
+function spawnConfetti(){
+  const stage = document.getElementById('stage');
+  const colors=['#E8B440','#1F6F63','#F2EFE6','#B23A48'];
+  for(let i=0;i<40;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    c.style.left = Math.random()*100+'%';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration = (2+Math.random()*2)+'s';
+    c.style.animationDelay = (Math.random()*1.5)+'s';
+    stage.appendChild(c);
+  }
+}
+
+/* ============================================================
+   LOCAL TICK LOOP (smooth per-second countdown re-render;
+   actual data sync now happens instantly via the Firebase realtime listener)
+   ============================================================ */
+async function tickLoop(){
+  if(mode==='display') renderDisplay();
+  if(mode==='admin') renderAdmin();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init(){
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('modeSwitch').style.display='none';
+  document.getElementById('admin').classList.remove('show');
+  document.getElementById('display').classList.remove('show');
+  setInterval(tickLoop, 250);
+})();
+</script>
+</body>
+</html>
